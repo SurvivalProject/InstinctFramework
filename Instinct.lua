@@ -2,11 +2,23 @@
 
 -- Should run as script, not as module
 
+--[[ 
+	Usage: 
+		Event: 
+				Create Event (as class)
+		Enum:
+				CreateEnum
+		Utilities are loaded in global environment
+
+
+--]]
+
+
 local LibraryManager = require("LibraryManager")
 local Configuration = require ("Configuration")
 
 local Libraries = {
-	"Class", "Utilities",
+	"Class", "Utilities", "Event", "Enum"
 
 }
 
