@@ -13,7 +13,7 @@
 -- used later for visible output via several output GUIs to make this look pretty
 function throw(type, source, ...)
 	local text = {...}
-
+	print(type, source, ...)
 
 end 
 
@@ -25,7 +25,7 @@ local Classes = {}
 local Class = {} 
 
 function Class:__index(index)
-	local ExtendClass = Classes[self.ClassName].Extends 
+	local ExtendClass = rawget(Classes[self.ClassName], "Extends")
 	return rawget(Classes[self.ClassName], index) or ExtendClass and rawget(Classes[ExtendClass], index)
 end 
 
