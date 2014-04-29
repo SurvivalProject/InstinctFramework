@@ -11,11 +11,6 @@
 -- arg2: source (extra info where this error comes from, handy for debugging)
 -- arg3..n: text to throw 
 -- used later for visible output via several output GUIs to make this look pretty
-function throw(type, source, ...)
-	local text = {...}
-	print(type, source, ...)
-
-end 
 
 
 -- Readonly has some special values which we don't want to touch
