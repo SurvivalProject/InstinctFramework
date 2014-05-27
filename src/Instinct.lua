@@ -25,40 +25,45 @@ if not ltype then
 end
 
 -- Define Instinct lib
-local Instinct = {} 
+_G.Instinct = {} 
+local Instinct = _G.Instinct
 
 Instinct.Global = [=[
-Option	
+Version
+Option
 Create
 ]=]
 
 Instinct.Client = [=[
-Palette		
+Utilities/Palette
 ]=]
 
 Instinct.Server = [=[
-	
+Utilities/ColorTools
+Utilities/Palette
 ]=]
 
-local root = game.Lighting.Instinct
+local root = game:GetService("ReplicatedStorage").Instinct
 
 --[[ Instinct.Load
 	@arg1: List (newline seperated module load list)
 --]]
 function Instinct.Load(List)
 	for ModuleName in List:gmatch("[^\n]+") do 
-		print(ModuleName, "hai")
 		local newroot = root
 		local objpointer = Instinct -- pointer to the table 
-		local previous = nil
+		local previous = objpointer
 		for NameMatch in ModuleName:gmatch("(%w+)/?") do
 			local try = newroot:FindFirstChild(NameMatch)
 			if try then
 				newroot = try
-				if not objpointer[try] then 
-					objpointer[try] = {} 
+				if try:IsA("Model") and not objpointer[try.Name] then 
+					objpointer[try.Name] = {} 
+					objpointer = objpointer[try.Name]
 					previous = objpointer
-					objpointer = objpointer[try]
+				elseif try:IsA("Model") then
+					objpointer = objpointer[try.Name]
+					previous = objpointer
 				end
 			else 
 				newroot = nil 
@@ -66,12 +71,12 @@ function Instinct.Load(List)
 			end	
 		end
 		if newroot and newroot:IsA("ModuleScript") and previous then 
-			print(newroot, type(newroot), newroot.Parent)
 			local Name = newroot.Name
+			print("[Instinct Info] Load: "..Name, newroot:GetFullName())
 			local out = require(newroot)
 			if type(out) == "table" and Instinct.Create and not out.__noreg then
 				Instinct.Create.Register(out)
-				Instinct.Create.RegisterClassName(ModuleName, out)
+				Instinct.Create.RegisterClassName(Name, out)
 			end
 			previous[Name] = out
 		else
