@@ -1,0 +1,329 @@
+<Item class="Model" referent="RBX0">
+  <Properties>
+    <CoordinateFrame name="ModelInPrimary">
+      <X>0</X>
+      <Y>0</Y>
+      <Z>0</Z>
+      <R00>1</R00>
+      <R01>0</R01>
+      <R02>0</R02>
+      <R10>0</R10>
+      <R11>1</R11>
+      <R12>0</R12>
+      <R20>0</R20>
+      <R21>0</R21>
+      <R22>1</R22>
+    </CoordinateFrame>
+    <string name="Name">Include</string>
+    <Ref name="PrimaryPart">null</Ref>
+  </Properties>
+  <Item class="Script" referent="RBX0">
+    <Properties>
+      <bool name="Disabled">false</bool>
+      <Content name="LinkedSource">
+        <null></null>
+      </Content>
+      <string name="Name">Create.lua</string>
+      <ProtectedString name="Source">--[[
+	Create
+	Purpose: 
+		Return utilites	
+	
+	
+--]]
+
+local Create = {}
+
+Create.__index = function(tab, index, value)
+	return tab
+end
+
+Create.__call = function(tab, ...)
+	if tab.Call then
+		return tab.Call(...)
+	end
+end
+
+Create.__newindex = function(tab, index, value)
+	if index == &quot;Parent&quot; and type(value) == &quot;table&quot; then
+		if tab.Parent then
+			local id = tab.__childid
+			value.__children[id] = nil
+		end
+		if not value.__children then 
+			value.__children = {}
+		end
+		table.insert(value.__children, tab)
+		rawset(tab, &quot;Parent&quot;, value)
+		rawset(tab, &quot;__childid&quot;, #value.__children - 1)
+	else
+		rawset(tab,index,value)
+	end
+end
+
+Create.__index = function(tab, index, value)
+	local root = rawget(tab, &quot;__root&quot;)
+	if root then 
+		local ri = root[index]
+		if ri then
+			return ri
+		end
+		local ext = root.__extend
+		if ext then 
+			return ext[value] -- Recursive
+		end
+	end
+end
+
+Create.Classes = {}
+
+function Create.RegisterClassName(ClassName, data)
+	if not Create.Classes[ClassName] then
+		Create.Classes[ClassName] = data
+	else
+		print(&quot;[Instinct Error] Conflicting ClassNames: &quot;..ClassName .. &quot; (ClassName already registered)&quot;)
+	end
+end
+
+function Create.Class() -- returns an empty class handler
+	local new = {}
+	return setmetatable(new, RegisterMeta)
+end
+
+function Create.Call(object)
+	local new = {}
+	local obj
+	if type(object) == &quot;string&quot; then
+		local cdata = Create.Classes[object]
+		if cdata then
+			obj = cdata
+		end
+	elseif type(object) == &quot;table&quot; then
+		obj = object
+	end
+	if not obj then
+		print(&quot;[Instinct Error] Could not load object: &quot;..tostring(object))
+		return nil
+	end
+	new.__root = obj
+	setmetatable(new, Create)
+	if obj.Constructor then 
+		obj.Constructor(new)
+	end
+	return new
+end
+
+-- Instinct.Create.Extend(Fruit, Banana)
+function Create.Extend(with, class)
+	class.__extend = with
+end
+
+local RegisterMeta = {}
+
+function RegisterMeta.__index(tab, index)
+	local ext = rawget(tab, &quot;__extend&quot;) 
+	if ext then 
+		return ext[index]
+	end
+end
+
+function Create.Register(class) -- Needed to assign the metatables
+	return setmetatable(class, RegisterMeta)
+end
+
+setmetatable(Create,Create)
+
+
+return Create</ProtectedString>
+    </Properties>
+  </Item>
+  <Item class="Script" referent="RBX0">
+    <Properties>
+      <bool name="Disabled">false</bool>
+      <Content name="LinkedSource">
+        <null></null>
+      </Content>
+      <string name="Name">Instinct.lua</string>
+      <ProtectedString name="Source">--[[
+	Instinct
+		Loads the Framework
+		
+	Usage:
+		require(Instinct).Load(&quot;Client&quot; | &quot;Server&quot;)
+		This will setup the Instinct Framework environment
+		in the Instinct namespace
+--]]
+
+-- Probe environment
+
+local pre = _G.__InstinctPresets
+local ltype
+if pre then
+	ltype = pre.LoadType
+end
+
+if not pre then
+	error(&quot;[Instinct Master Error] Could not load Instinct, _G.__InstinctPresests is not defined.&quot;)
+end
+
+if not ltype then
+	error(&quot;[Instinct Master Error] Could not find LoadType, Instinct cannot load.&quot;)
+end
+
+-- Define Instinct lib
+local Instinct = {} 
+
+Instinct.Global = [=[
+Option	
+Create
+]=]
+
+Instinct.Client = [=[
+Palette		
+]=]
+
+Instinct.Server = [=[
+	
+]=]
+
+local root = game.Lighting.Instinct
+
+--[[ Instinct.Load
+	@arg1: List (newline seperated module load list)
+--]]
+function Instinct.Load(List)
+	for ModuleName in List:gmatch(&quot;[^\n]+&quot;) do 
+		print(ModuleName, &quot;hai&quot;)
+		local newroot = root
+		local objpointer = Instinct -- pointer to the table 
+		local previous = nil
+		for NameMatch in ModuleName:gmatch(&quot;(%w+)/?&quot;) do
+			local try = newroot:FindFirstChild(NameMatch)
+			if try then
+				newroot = try
+				if not objpointer[try] then 
+					objpointer[try] = {} 
+					previous = objpointer
+					objpointer = objpointer[try]
+				end
+			else 
+				newroot = nil 
+				break
+			end	
+		end
+		if newroot and newroot:IsA(&quot;ModuleScript&quot;) and previous then 
+			print(newroot, type(newroot), newroot.Parent)
+			local Name = newroot.Name
+			local out = require(newroot)
+			if type(out) == &quot;table&quot; and Instinct.Create and not out.__noreg then
+				Instinct.Create.Register(out)
+				Instinct.Create.RegisterClassName(ModuleName, out)
+			end
+			previous[Name] = out
+		else
+			print(&quot;[Instinct Error] [Load]: Unable to load module: &quot;..ModuleName..&quot;, module does not exist!&quot;)
+		end
+	end
+end
+
+function Instinct.Initialize(mode)
+	if mode == &quot;Server&quot; then
+		Instinct.Client = nil
+		Instinct.Load(Instinct.Global)
+		Instinct.Load(Instinct.Server)
+	elseif mode == &quot;Client&quot; then
+		Instinct.Server = nil
+		Instinct.Load(Instinct.Global)
+		Instinct.Load(Instinct.Client)
+	end
+end
+
+Instinct.Initialize(ltype)
+
+return Instinct</ProtectedString>
+    </Properties>
+  </Item>
+  <Item class="Script" referent="RBX0">
+    <Properties>
+      <bool name="Disabled">false</bool>
+      <Content name="LinkedSource">
+        <null></null>
+      </Content>
+      <string name="Name">Option.lua</string>
+      <ProtectedString name="Source">--[[
+	Option
+	Purpose:
+		Create Option functions
+	
+--]]
+
+local OPTIONS = {}
+
+-- 
+
+return true</ProtectedString>
+    </Properties>
+  </Item>
+  <Item class="Model" referent="RBX0">
+    <Properties>
+      <CoordinateFrame name="ModelInPrimary">
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+        <R00>1</R00>
+        <R01>0</R01>
+        <R02>0</R02>
+        <R10>0</R10>
+        <R11>1</R11>
+        <R12>0</R12>
+        <R20>0</R20>
+        <R21>0</R21>
+        <R22>1</R22>
+      </CoordinateFrame>
+      <string name="Name">Services</string>
+      <Ref name="PrimaryPart">null</Ref>
+    </Properties>
+  </Item>
+  <Item class="Model" referent="RBX0">
+    <Properties>
+      <CoordinateFrame name="ModelInPrimary">
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+        <R00>1</R00>
+        <R01>0</R01>
+        <R02>0</R02>
+        <R10>0</R10>
+        <R11>1</R11>
+        <R12>0</R12>
+        <R20>0</R20>
+        <R21>0</R21>
+        <R22>1</R22>
+      </CoordinateFrame>
+      <string name="Name">Utilities</string>
+      <Ref name="PrimaryPart">null</Ref>
+    </Properties>
+    <Item class="Script" referent="RBX0">
+      <Properties>
+        <bool name="Disabled">false</bool>
+        <Content name="LinkedSource">
+          <null></null>
+        </Content>
+        <string name="Name">Palette.lua</string>
+        <ProtectedString name="Source">local Palette = {}</ProtectedString>
+      </Properties>
+    </Item>
+  </Item>
+  <Item class="Script" referent="RBX0">
+    <Properties>
+      <bool name="Disabled">false</bool>
+      <Content name="LinkedSource">
+        <null></null>
+      </Content>
+      <string name="Name">Version.lua</string>
+      <ProtectedString name="Source">return &quot;0.0.1&quot;
+
+-- This file should only return a version string!</ProtectedString>
+    </Properties>
+  </Item>
+</Item>
