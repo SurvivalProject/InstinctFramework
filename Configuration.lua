@@ -1,5 +1,0 @@
-local Configuration = {}
-
-
-
-return Configuration
