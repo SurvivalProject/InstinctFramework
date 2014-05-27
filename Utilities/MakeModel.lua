@@ -55,7 +55,7 @@ function makescript(name, location, data)
     Content:append("null")[1] = ""
     local nam = properties:append("string")
     nam.name = "Name"
-    nam[1] = name 
+    nam[1] = name:gsub(".lua", "")
     local ps = properties:append("ProtectedString")
     ps.name = "Source"
     ps[1] = data
