@@ -81,7 +81,9 @@ Create
 ]=]
 
 Instinct.Client = [=[
+Menu
 Utilities/Palette
+Gui/Window
 ]=]
 
 Instinct.Server = [=[
@@ -94,7 +96,7 @@ local root = game:GetService(&quot;ReplicatedStorage&quot;).Instinct
 --[[ Instinct.Load
 &#9;@arg1: List (newline seperated module load list)
 --]]
-function Instinct.Load(List)
+function Instinct.Load(List, only)
 &#9;for ModuleName in List:gmatch(&quot;[^\n]+&quot;) do 
 &#9;&#9;local newroot = root
 &#9;&#9;local objpointer = Instinct -- pointer to the table 
@@ -125,10 +127,17 @@ function Instinct.Load(List)
 &#9;&#9;&#9;&#9;Instinct.Create.RegisterClassName(Name, out)
 &#9;&#9;&#9;end
 &#9;&#9;&#9;previous[Name] = out
+&#9;&#9;&#9;if only then 
+&#9;&#9;&#9;&#9;return out
+&#9;&#9;&#9;end
 &#9;&#9;else
 &#9;&#9;&#9;print(&quot;[Instinct Error] [Load]: Unable to load module: &quot;..ModuleName..&quot;, module does not exist!&quot;)
 &#9;&#9;end
 &#9;end
+end
+
+function Instinct.Include(name)
+&#9;return Instinct.Load(name, true)
 end
 
 function Instinct.Initialize(mode)
@@ -312,8 +321,11 @@ return Create</ProtectedString>
 					<string name="Name">Palette</string>
 					<ProtectedString name="Source">local Palette = {}
 
-local rgb = Instinct.Utilities.ColorTools.RGBToColor3
 
+
+local ct = Instinct.Include(&quot;Utilities/ColorTools&quot;)
+print(ct)
+local rgb = ct.RGBToColor3
 
 
 Palette.Data = {
@@ -344,6 +356,20 @@ Palette.Data = {
 &#9;&#9;Shade2 = rgb(189, 91, 91),
 &#9;&#9;Shade3 = rgb(119, 25, 25),
 &#9;&#9;Shade4 = rgb( 78,  3,  3),
+&#9;},
+&#9;Text = {
+&#9;&#9;Default = rgb(0,0,0),
+&#9;&#9;White = rgb(255,255,255)
+&#9;},
+&#9;Background = {
+&#9;&#9;Default = rgb(0,0,0),
+&#9;&#9;Shade1 = rgb(20,20,20),
+&#9;&#9;Shade2 = rgb(40,40,40),
+&#9;&#9;Shade3 = rgb(60,60,60),
+&#9;&#9;Shade4 = rgb(80,80,80),
+&#9;},
+&#9;SFX = {
+&#9;&#9;Default = rgb(0,0,0), -- shade color
 &#9;}
 }
 
@@ -380,7 +406,266 @@ return ColorTools</ProtectedString>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Version</string>
-				<ProtectedString name="Source">return &quot;0.0.52&quot;</ProtectedString>
+				<ProtectedString name="Source">return &quot;0.0.103&quot;</ProtectedString>
+			</Properties>
+		</Item>
+		<Item class="Model" referent="RBX9">
+			<Properties>
+				<CoordinateFrame name="ModelInPrimary">
+					<X>0</X>
+					<Y>0</Y>
+					<Z>0</Z>
+					<R00>1</R00>
+					<R01>0</R01>
+					<R02>0</R02>
+					<R10>0</R10>
+					<R11>1</R11>
+					<R12>0</R12>
+					<R20>0</R20>
+					<R21>0</R21>
+					<R22>1</R22>
+				</CoordinateFrame>
+				<string name="Name">Gui</string>
+				<Ref name="PrimaryPart">null</Ref>
+			</Properties>
+			<Item class="Script" referent="RBX10">
+				<Properties>
+					<bool name="Disabled">false</bool>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">ButtonBar</string>
+					<ProtectedString name="Source">local ButtonBar = {}
+
+return ButtonBar</ProtectedString>
+				</Properties>
+			</Item>
+			<Item class="Script" referent="RBX11">
+				<Properties>
+					<bool name="Disabled">false</bool>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">DimTools</string>
+					<ProtectedString name="Source">-- DimTools define functions for moving and reszing GUIs around
+-- They respect the parent GUIs
+
+local DimTools = {}
+
+function DimTools.Center(Gui)
+&#9;local as = game.Players.LocalPlayer.PlayerGui.Windows.AbsoluteSize
+&#9;local x,y = as.X, as.Y
+&#9;Gui.Position = UDim2.new(0.5 - (Gui.Size.X.Scale/2), x/Gui.Size.X.Offset * 0.5, 0.5 - (Gui.Size.Y.Scale/2), y/Gui.Size.Y.Offset * 0.5)
+end
+
+return DimTools</ProtectedString>
+				</Properties>
+			</Item>
+			<Item class="Script" referent="RBX12">
+				<Properties>
+					<bool name="Disabled">false</bool>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">WindowServer</string>
+					<ProtectedString name="Source">local WindowServer = {}
+
+WindowServer.Windows = {}
+
+function WindowServer.Notify(Window, StateChange)
+&#9;
+end
+
+function WindowServer.RequestOpen(WindowName)
+&#9;if WindowServer.Windows[WindowName] then
+&#9;&#9;WindowServer.Windows[WindowName]:Open()
+&#9;else
+&#9;&#9;local new = Instinct.Create(Instinct.Gui.Window)
+&#9;&#9;new:Create()
+&#9;&#9;new:SetTitle(WindowName)
+&#9;&#9;WindowServer.Windows[WindowName] = new
+&#9;end
+&#9;for i,v in pairs(WindowServer.Windows) do
+&#9;&#9;if i ~= WindowName then
+&#9;&#9;&#9;v:Close()
+&#9;&#9;&#9;print(&quot;CLOSING&quot;)
+&#9;&#9;end
+&#9;end
+end
+
+return WindowServer</ProtectedString>
+				</Properties>
+			</Item>
+			<Item class="Script" referent="RBX13">
+				<Properties>
+					<bool name="Disabled">false</bool>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">Window</string>
+					<ProtectedString name="Source">local Window = {}
+
+local Palette = Instinct.Include(&quot;Utilities/Palette&quot;)
+local Dim = Instinct.Include(&quot;Gui/DimTools&quot;)
+local WindowServer = Instinct.Include(&quot;Gui/WindowServer&quot;)
+local SFX = Instinct.Include(&quot;Gui/SFX&quot;)
+
+Window.Canvas = nil
+Window.Root = nil
+
+local Player = game.Players.LocalPlayer
+
+function Window:Create(Size, Title)
+&#9;if Player.PlayerGui:FindFirstChild(&quot;Windows&quot;) == nil then 
+&#9;&#9;Instance.new(&quot;ScreenGui&quot;, Player.PlayerGui).Name = &quot;Windows&quot;
+&#9;end
+&#9;local Root = Player.PlayerGui.Windows
+&#9;local new = Instance.new(&quot;Frame&quot;, Root)
+&#9;new.BackgroundColor3 = Palette:Get(&quot;Background&quot;, &quot;Shade4&quot;) 
+&#9;new.BackgroundTransparency = 0.5
+&#9;new.Size = Size or UDim2.new(0.5,0,0.5,0)
+&#9;new.BorderSizePixel = 0
+&#9;Dim.Center(new)
+&#9;-- Create header
+&#9;local header = Instance.new(&quot;Frame&quot;, new)
+&#9;header.Position = UDim2.new(0,0,0,-20)
+&#9;header.Size = UDim2.new(1,0,0,20)
+&#9;header.BorderSizePixel = 0
+&#9;header.BackgroundColor3 = Palette:Get(&quot;Default&quot;, &quot;Shade4&quot;)
+&#9;-- Create title
+&#9;local title = Instance.new(&quot;TextLabel&quot;, header)
+&#9;title.Position = UDim2.new(0.25, 0, 0, -6)
+&#9;title.Size = UDim2.new(0.5, 0, 0, 20)
+&#9;title.Text = Title or &quot;&quot;
+&#9;title.Font = &quot;ArialBold&quot;
+&#9;title.FontSize = &quot;Size18&quot;
+&#9;title.TextColor3 = Palette:Get(&quot;Text&quot;)
+&#9;title.BorderSizePixel = 0
+&#9;title.BackgroundColor3 = Palette:Get(&quot;Default&quot;, &quot;Shade2&quot;)
+&#9;self.Title = title
+&#9;SFX.Shade(title, 3)
+&#9;-- Create buttons
+&#9;local close = Instance.new(&quot;TextButton&quot;, header)
+&#9;close.Size = UDim2.new(0,30, 0,12)
+&#9;close.Position = UDim2.new(1, -40, 0, 4)
+&#9;close.Text = &quot;X&quot;
+&#9;close.BorderSizePixel = 0
+&#9;close.TextColor3 = Palette:Get(&quot;Text&quot;, &quot;Default&quot;)
+&#9;close.BackgroundColor3 = Palette:Get(&quot;Complement&quot;, &quot;Default&quot;)
+&#9;close.MouseButton1Click:connect(function()
+&#9;&#9;WindowServer:Notify(new, &quot;Close&quot;)
+&#9;&#9;self:Close()
+&#9;end)
+&#9;SFX.Shade(close, 2)
+&#9;self.Canvas = new
+end
+
+function Window:Close()
+&#9;self.Canvas.Visible = false
+end
+
+function Window:Open()
+&#9;self.Canvas.Visible = true
+end
+
+function Window:SetTitle(title)
+&#9;self.Title.Text = title
+end
+
+return Window</ProtectedString>
+				</Properties>
+			</Item>
+			<Item class="Script" referent="RBX14">
+				<Properties>
+					<bool name="Disabled">false</bool>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">SFX</string>
+					<ProtectedString name="Source">local SFX = {}
+
+local Palette = Instinct.Include(&quot;Utilities/Palette&quot;)
+
+function SFX.Shade(which, size)
+&#9;local size = size or 3
+&#9;local shadeunder = Instance.new(&quot;Frame&quot;, which)
+&#9;shadeunder.BorderSizePixel = 0
+&#9;shadeunder.BackgroundColor3 = Palette:Get(&quot;SFX&quot;, &quot;Default&quot;)
+&#9;shadeunder.Name = &quot;Shade&quot;
+&#9;local shaderight = shadeunder:Clone()
+&#9;shaderight.Parent = which
+&#9;shaderight.Size = UDim2.new(0,size,1,0)
+&#9;shadeunder.Size = UDim2.new(1,0,0,size)
+&#9;shaderight.Position = UDim2.new(1,0,0,size)
+&#9;shadeunder.Position = UDim2.new(0,size,1,0)
+&#9;
+end
+
+return SFX</ProtectedString>
+				</Properties>
+			</Item>
+		</Item>
+		<Item class="Script" referent="RBX15">
+			<Properties>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">Menu</string>
+				<ProtectedString name="Source">local ButtonBar = Instinct.Include(&quot;Gui/ButtonBar&quot;)
+local Palette = Instinct.Include(&quot;Utilities/Palette&quot;)
+local SFX = Instinct.Include(&quot;Gui/SFX&quot;)
+local WindowServer = Instinct.Include(&quot;Gui/WindowServer&quot;)
+
+local Player = game.Players.LocalPlayer
+
+local Menu = {}
+
+Menu.Offset = 4
+Menu.YSize = 30
+Menu.Shade = 2
+Menu.FontSize = &quot;Size14&quot;
+
+function Menu:Init()
+&#9;local Scr = Instance.new(&quot;ScreenGui&quot;, Player.PlayerGui)
+&#9;Scr.Name = &quot;Menu&quot;
+&#9;self.Root = Scr
+&#9;local bar = Instance.new(&quot;Frame&quot;, Scr)
+&#9;bar.Size=UDim2.new(0,0,0,self.YSize)
+&#9;bar.BorderSizePixel = 3
+&#9;bar.BorderColor3 = Palette:Get(&quot;Default&quot;, &quot;Shade4&quot;)
+&#9;bar.BackgroundColor3 = Palette:Get(&quot;Default&quot;, &quot;Shade2&quot;)
+&#9;self.Bar = bar
+&#9;-- create dropdown button
+&#9;Menu:AddButton(&quot;V&quot;, &quot;DropDown&quot;)
+end
+
+function Menu:GetButton(type)
+&#9;local DropDown = Instance.new(&quot;TextButton&quot;, self.Root)
+&#9;local offset = self.YSize - self.Offset * 2
+&#9;DropDown.BackgroundColor3 = Palette:Get(&quot;Complement&quot;)
+&#9;DropDown.TextColor3 = Palette:Get(&quot;Text&quot;)
+&#9;DropDown.Font = &quot;ArialBold&quot;
+&#9;DropDown.FontSize = self.FontSize
+&#9;DropDown.Text = &quot;V&quot;
+&#9;DropDown.BorderSizePixel = 0
+&#9;SFX.Shade(DropDown,self.Shade)
+&#9;if type == &quot;DropDown&quot; then 
+&#9;&#9;-- create dropdown once clicked
+&#9;else 
+&#9;&#9;-- negotiate with winserver
+&#9;&#9;DropDown.MouseButton1Click:connect(function() 
+&#9;&#9;&#9;WindowServer.RequestOpen(DropDown.Text)
+&#9;&#9;end)
+&#9;end
+&#9;return DropDown
+end
+
+function Menu:AddButton(button_name, type)
+&#9;local button = self:GetButton(type or &quot;Window&quot;)
+&#9;button.Text = button_name
+&#9;local max = 0
+&#9;for i,v in pairs(self.Root:GetChildren()) do
+&#9;&#9;if v.Position.X.Offset + v.Size.X.Offset + self.Offset + self.Shade &gt; max then 
+&#9;&#9;&#9;max = v.Position.X.Offset + v.Size.X.Offset + self.Offset + self.Shade
+&#9;&#9;end
+&#9;end
+&#9;button.Position = UDim2.new(0,max,0,self.Offset)
+&#9;local offset = self.YSize - self.Offset * 2
+&#9;button.Size = UDim2.new(0, button.TextBounds.X + 10, 0, offset)
+&#9;local nsize = max + button.Size.X.Offset + self.Offset + self.Shade
+&#9;delay(1/30, function() self.Bar.Size = UDim2.new(0, nsize, 0, self.YSize) end)
+end
+
+return Menu </ProtectedString>
 			</Properties>
 		</Item>
 	</Item>

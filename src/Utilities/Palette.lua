@@ -1,7 +1,10 @@
 local Palette = {}
 
-local rgb = Instinct.Utilities.ColorTools.RGBToColor3
 
+
+local ct = Instinct.Include("Utilities/ColorTools")
+print(ct)
+local rgb = ct.RGBToColor3
 
 
 Palette.Data = {
@@ -32,6 +35,20 @@ Palette.Data = {
 		Shade2 = rgb(189, 91, 91),
 		Shade3 = rgb(119, 25, 25),
 		Shade4 = rgb( 78,  3,  3),
+	},
+	Text = {
+		Default = rgb(0,0,0),
+		White = rgb(255,255,255)
+	},
+	Background = {
+		Default = rgb(0,0,0),
+		Shade1 = rgb(20,20,20),
+		Shade2 = rgb(40,40,40),
+		Shade3 = rgb(60,60,60),
+		Shade4 = rgb(80,80,80),
+	},
+	SFX = {
+		Default = rgb(0,0,0), -- shade color
 	}
 }
 

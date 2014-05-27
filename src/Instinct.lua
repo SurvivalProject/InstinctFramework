@@ -35,7 +35,9 @@ Create
 ]=]
 
 Instinct.Client = [=[
+Menu
 Utilities/Palette
+Gui/Window
 ]=]
 
 Instinct.Server = [=[
@@ -48,7 +50,7 @@ local root = game:GetService("ReplicatedStorage").Instinct
 --[[ Instinct.Load
 	@arg1: List (newline seperated module load list)
 --]]
-function Instinct.Load(List)
+function Instinct.Load(List, only)
 	for ModuleName in List:gmatch("[^\n]+") do 
 		local newroot = root
 		local objpointer = Instinct -- pointer to the table 
@@ -79,10 +81,17 @@ function Instinct.Load(List)
 				Instinct.Create.RegisterClassName(Name, out)
 			end
 			previous[Name] = out
+			if only then 
+				return out
+			end
 		else
 			print("[Instinct Error] [Load]: Unable to load module: "..ModuleName..", module does not exist!")
 		end
 	end
+end
+
+function Instinct.Include(name)
+	return Instinct.Load(name, true)
 end
 
 function Instinct.Initialize(mode)

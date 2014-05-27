@@ -82,7 +82,7 @@ oldversion, newversion, version =  dofile("GetVersion.lua")
 
 local act = not version -- we are doing it backwards
 
-if not version then 
+if act then 
 
     print("Parsing......")
 

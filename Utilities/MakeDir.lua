@@ -48,7 +48,9 @@ function IsNewVersion(old, new)
 	local new_1, new_2, new_3 = new:match("(%d+)%.(%d+)%.(%d+)")
 	OLDVERSION = old_1.."."..old_2.."."..old_3
 	NEWVERSION = new_1.."."..new_2.."."..new_3
-	if old_1 <= new_1 and old_2 <= new_2 and old_3 < new_3 then 
+	print(OLDVERSION, NEWVERSION)
+	print(old_1 <= new_1 , old_2 <= new_2 , tonumber(old_3) < tonumber(new_3))
+	if tonumber(old_1) <= tonumber(new_1) and tonumber(old_2) <= tonumber(new_2) and tonumber(old_3) < tonumber(new_3) then 
 		return true 
 	end 
 	return false 
@@ -180,6 +182,7 @@ end
 
 
 if not IsNewVersion(version, newversion) then 
+	print(version, newversion)
 	print("Trying to update with old / same version, please update Include/Version.lua")
 	os.exit()
 else
