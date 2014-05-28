@@ -406,7 +406,7 @@ return ColorTools</ProtectedString>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Version</string>
-				<ProtectedString name="Source">return &quot;0.0.103&quot;</ProtectedString>
+				<ProtectedString name="Source">return &quot;0.0.130&quot;</ProtectedString>
 			</Properties>
 		</Item>
 		<Item class="Model" referent="RBX9">
@@ -452,6 +452,25 @@ function DimTools.Center(Gui)
 &#9;local as = game.Players.LocalPlayer.PlayerGui.Windows.AbsoluteSize
 &#9;local x,y = as.X, as.Y
 &#9;Gui.Position = UDim2.new(0.5 - (Gui.Size.X.Scale/2), x/Gui.Size.X.Offset * 0.5, 0.5 - (Gui.Size.Y.Scale/2), y/Gui.Size.Y.Offset * 0.5)
+end
+
+function DimTools.TextSize(text, font, fontsize)
+&#9;if not game.Players.LocalPlayer.PlayerGui:FindFirstChild(&quot;FontCHK&quot;) then 
+&#9;&#9;local new = Instance.new(&quot;ScreenGui&quot;, game.Players.LocalPlayer.PlayerGui)
+&#9;&#9;new.Name = &quot;FontCHK&quot;
+&#9;&#9;local x = Instance.new(&quot;TextButton&quot;, new)
+&#9;&#9;x.Visible = false
+&#9;end
+&#9;local my = game.Players.LocalPlayer.PlayerGui.FontCHK.TextButton
+
+&#9;my.FontSize = fontsize
+&#9;my.Text = text
+&#9;my.Font = font
+&#9;if my.TextBounds.X == 0 or my.TextBounds.Y == 0 then
+&#9;&#9;repeat wait(1/60) 
+&#9;&#9;until my.TextBounds.X ~= 0 and my.TextBounds.Y ~= 0
+&#9;end
+&#9;return my.TextBounds.X, my.TextBounds.Y
 end
 
 return DimTools</ProtectedString>
@@ -591,11 +610,173 @@ function SFX.Shade(which, size)
 &#9;
 end
 
+function SFX.MakeBorder(which, left, right, up, down, color, bordersize)
+&#9;function get()
+&#9;&#9;local new = Instance.new(&quot;Frame&quot;, which)
+&#9;&#9;new.BackgroundColor3 = color
+&#9;&#9;new.BorderSizePixel = 0
+&#9;&#9;new.Name = &quot;Border&quot;
+&#9;&#9;return new
+&#9;end
+&#9;-- left
+&#9;if left then 
+&#9;local x = get()
+&#9;local yoffset = -((up and bordersize) or 0)
+&#9;x.Position = UDim2.new(0, -bordersize, 0, yoffset)
+&#9;x.Size = UDim2.new(0, bordersize, 1, -yoffset + ((down and bordersize) or 0))
+&#9;end
+&#9;-- right
+&#9;if right then
+&#9;local x = get()
+&#9;local yoffset = -((up and bordersize) or 0)
+&#9;x.Position = UDim2.new(1,0,0, yoffset)
+&#9;x.Size = UDim2.new(0, bordersize, 1, -yoffset + ((down and bordersize) or 0))
+&#9;end
+&#9;-- down
+&#9;if down then 
+&#9;local y = get()
+&#9;local xoffset = -((left and bordersize) or 0)
+&#9;y.Position = UDim2.new(0,xoffset,1, 0)
+&#9;y.Size = UDim2.new(1, xoffset + ((right and bordersize) or 0), 0, bordersize)
+&#9;end
+&#9;-- up
+&#9;if up then 
+&#9;local y = get()
+&#9;local xoffset = -((left and bordersize) or 0)
+&#9;y.Position = UDim2.new(0,xoffset,0, -bordersize)
+&#9;y.Size = UDim2.new(0, xoffset + ((right and bordersize) or 0), 0, bordersize)
+&#9;end&#9;
+end
+
 return SFX</ProtectedString>
 				</Properties>
 			</Item>
+			<Item class="Script" referent="RBX15">
+				<Properties>
+					<bool name="Disabled">false</bool>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">DropDown</string>
+					<ProtectedString name="Source">local DropDown = {}
+
+DropDown.XOffset = 10
+DropDown.YOffset = 5
+DropDown.TextOffset = 5
+DropDown.Shade = 2
+
+local SFX = Instinct.Include(&quot;Gui/SFX&quot;)
+local Presets = Instinct.Include(&quot;Gui/GuiPresets&quot;)
+local Dim = Instinct.Include(&quot;Gui/DimTools&quot;)
+
+function DropDown:Create(Parent, Position, BackgroundC3, BorderC3, BorderSize)
+&#9;local new = Presets.Canvas(BackgroundC3)
+&#9;new.Position = Position or UDim2.new(0,0,0,0)
+&#9;new.Parent = Parent
+&#9;if type(BorderSize) == &quot;table&quot; then
+&#9;&#9;local need = { &quot;left&quot;, &quot;right&quot;, &quot;down&quot;, &quot;up&quot;, &quot;bordersize&quot;}
+&#9;&#9;local wrong = false
+&#9;&#9;for i,v in pairs(need) do 
+&#9;&#9;&#9;if BorderSize[v] == nil then 
+&#9;&#9;&#9;&#9;wrong = true
+&#9;&#9;&#9;&#9;print(v)
+&#9;&#9;&#9;&#9;break
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;&#9;print(wrong, BorderSize.which)
+&#9;&#9;if not wrong then
+&#9;&#9;&#9;SFX.MakeBorder(new, BorderSize.left, BorderSize.right, BorderSize.up, BorderSize.down, BorderC3, BorderSize.bordersize)
+&#9;&#9;end
+&#9;else
+&#9;&#9;new.BorderSizePixel = BorderSize or 0
+&#9;&#9;new.BorderColor3 = BorderC3 or Palette:Get()
+&#9;end
+&#9;&#9;
+&#9;self.Root = new
+end
+
+function DropDown:AddButton(text)
+&#9;local new = Presets.Button(self.Shade)
+&#9;local numbuttons = 0
+&#9;for i,v in pairs(self.Root:GetChildren()) do
+&#9;&#9;if v.Name ~= &quot;Border&quot; then
+&#9;&#9;&#9;numbuttons = numbuttons + 1
+&#9;&#9;end
+&#9;end
+&#9;local ypos = (self.YOffset + self.Shade + new.Size.Y.Offset) * numbuttons + self.YOffset
+&#9;new.Text = text
+&#9;new.FontSize = &quot;Size12&quot;
+&#9;local xt, yt = Dim.TextSize(text, &quot;ArialBold&quot;, &quot;Size12&quot;)
+&#9;print(xt, &quot;hi&quot;)
+&#9;new.Size = UDim2.new(0, xt + self.TextOffset * 2, 0, new.Size.Y.Offset)
+&#9;new.Position = UDim2.new(0, self.XOffset, 0, ypos)
+&#9;new.Parent = self.Root
+&#9;local max_x = 0
+&#9;for i,v in pairs(self.Root:GetChildren()) do
+&#9;&#9;if v.Name ~= &quot;Border&quot; then 
+&#9;&#9;&#9;local new_x = self.XOffset * 2 + v.Size.X.Offset
+&#9;&#9;&#9;if new_x &gt; max_x then
+&#9;&#9;&#9;&#9;max_x = new_x
+&#9;&#9;&#9;end
+&#9;&#9;end
+&#9;end
+&#9;for i,v in pairs(self.Root:GetChildren()) do
+&#9;&#9;if v.Name ~= &quot;Border&quot; then 
+&#9;&#9;&#9;v.Size = UDim2.new(0, max_x - self.XOffset * 2, 0, new.Size.Y.Offset)
+&#9;&#9;end
+&#9;end
+&#9;local ysize = ypos + new.Size.Y.Offset + self.Shade + self.YOffset
+&#9;print(ysize)
+&#9;self.Root.Size = UDim2.new(0,max_x, 0, ysize)
+&#9;
+&#9;new.MouseButton1Click:connect(function() print(&quot;click&quot;) end)
+&#9;
+end
+
+
+function DropDown:Destroy()
+&#9;self.Root:Destroy()
+end
+
+return DropDown</ProtectedString>
+				</Properties>
+			</Item>
+			<Item class="Script" referent="RBX16">
+				<Properties>
+					<bool name="Disabled">false</bool>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">GuiPresets</string>
+					<ProtectedString name="Source">local GuiPresets = {}
+
+local Palette = Instinct.Include(&quot;Utilities/Palette&quot;)
+local SFX = Instinct.Include(&quot;Gui/SFX&quot;)
+
+function GuiPresets.Button(shade)
+&#9;local DropDown = Instance.new(&quot;TextButton&quot;)
+&#9;DropDown.BackgroundColor3 = Palette:Get(&quot;Complement&quot;)
+&#9;DropDown.TextColor3 = Palette:Get(&quot;Text&quot;)
+&#9;DropDown.Font = &quot;ArialBold&quot;
+&#9;DropDown.Text = &quot;&quot;
+&#9;DropDown.BorderSizePixel = 0
+&#9;DropDown.Size = UDim2.new(0,10,0,20)
+&#9;DropDown.FontSize = &quot;Size12&quot;
+&#9;if shade then 
+&#9;&#9;SFX.Shade(DropDown,shade)
+&#9;end
+&#9;return DropDown
+end
+
+function GuiPresets.Canvas(color)
+&#9;local canvas = Instance.new(&quot;Frame&quot;)
+&#9;canvas.BackgroundColor3 = color or Palette:Get()
+&#9;canvas.BorderSizePixel = 0
+&#9;return canvas
+end
+
+
+return GuiPresets</ProtectedString>
+				</Properties>
+			</Item>
 		</Item>
-		<Item class="Script" referent="RBX15">
+		<Item class="Script" referent="RBX17">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -604,6 +785,7 @@ return SFX</ProtectedString>
 local Palette = Instinct.Include(&quot;Utilities/Palette&quot;)
 local SFX = Instinct.Include(&quot;Gui/SFX&quot;)
 local WindowServer = Instinct.Include(&quot;Gui/WindowServer&quot;)
+local DDMenu = Instinct.Include(&quot;Gui/DropDown&quot;)
 
 local Player = game.Players.LocalPlayer
 
@@ -612,7 +794,9 @@ local Menu = {}
 Menu.Offset = 4
 Menu.YSize = 30
 Menu.Shade = 2
+Menu.BorderSize = 3
 Menu.FontSize = &quot;Size14&quot;
+Menu.LastDropDown = nil
 
 function Menu:Init()
 &#9;local Scr = Instance.new(&quot;ScreenGui&quot;, Player.PlayerGui)
@@ -620,15 +804,15 @@ function Menu:Init()
 &#9;self.Root = Scr
 &#9;local bar = Instance.new(&quot;Frame&quot;, Scr)
 &#9;bar.Size=UDim2.new(0,0,0,self.YSize)
-&#9;bar.BorderSizePixel = 3
+&#9;bar.BorderSizePixel = self.BorderSize
 &#9;bar.BorderColor3 = Palette:Get(&quot;Default&quot;, &quot;Shade4&quot;)
 &#9;bar.BackgroundColor3 = Palette:Get(&quot;Default&quot;, &quot;Shade2&quot;)
 &#9;self.Bar = bar
 &#9;-- create dropdown button
-&#9;Menu:AddButton(&quot;V&quot;, &quot;DropDown&quot;)
+&#9;Menu:AddButton(&quot;V&quot;, &quot;DropDown&quot;, {&quot;Console&quot;, &quot;Administration&quot;, &quot;Server&quot;})
 end
 
-function Menu:GetButton(type)
+function Menu:GetButton(type, openlist)
 &#9;local DropDown = Instance.new(&quot;TextButton&quot;, self.Root)
 &#9;local offset = self.YSize - self.Offset * 2
 &#9;DropDown.BackgroundColor3 = Palette:Get(&quot;Complement&quot;)
@@ -638,8 +822,25 @@ function Menu:GetButton(type)
 &#9;DropDown.Text = &quot;V&quot;
 &#9;DropDown.BorderSizePixel = 0
 &#9;SFX.Shade(DropDown,self.Shade)
-&#9;if type == &quot;DropDown&quot; then 
-&#9;&#9;-- create dropdown once clicked
+&#9;if type == &quot;DropDown&quot; and openlist then 
+&#9;&#9;DropDown.MouseButton1Click:connect(function()
+&#9;&#9;if self.LastDropDown then
+&#9;&#9;&#9;self.LastDropDown:Destroy()
+&#9;&#9;end
+&#9;&#9;local new = Instinct.Create(Instinct.Gui.DropDown)
+&#9;&#9;self.LastDropDown = new
+&#9;&#9;new:Create(self.Root, UDim2.new(0,0,0, self.YSize + self.BorderSize), Palette:Get(&quot;Default&quot;, &quot;Shade1&quot;), Palette:Get(&quot;Default&quot;, &quot;Shade4&quot;), 
+&#9;&#9;&#9;{&#9;which = DropDown,
+&#9;&#9;&#9;&#9;left = false,
+&#9;&#9;&#9;&#9;right = true,
+&#9;&#9;&#9;&#9;up = false,
+&#9;&#9;&#9;&#9;down = true,
+&#9;&#9;&#9;&#9;bordersize = self.BorderSize,
+&#9;&#9;})
+&#9;&#9;for i,v in pairs(openlist) do 
+&#9;&#9;&#9;new:AddButton(v)
+&#9;&#9;end
+&#9;&#9;end)
 &#9;else 
 &#9;&#9;-- negotiate with winserver
 &#9;&#9;DropDown.MouseButton1Click:connect(function() 
@@ -649,8 +850,8 @@ function Menu:GetButton(type)
 &#9;return DropDown
 end
 
-function Menu:AddButton(button_name, type)
-&#9;local button = self:GetButton(type or &quot;Window&quot;)
+function Menu:AddButton(button_name, type, openlist)
+&#9;local button = self:GetButton(type or &quot;Window&quot;, openlist)
 &#9;button.Text = button_name
 &#9;local max = 0
 &#9;for i,v in pairs(self.Root:GetChildren()) do

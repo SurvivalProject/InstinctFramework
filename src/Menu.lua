@@ -2,6 +2,7 @@ local ButtonBar = Instinct.Include("Gui/ButtonBar")
 local Palette = Instinct.Include("Utilities/Palette")
 local SFX = Instinct.Include("Gui/SFX")
 local WindowServer = Instinct.Include("Gui/WindowServer")
+local DDMenu = Instinct.Include("Gui/DropDown")
 
 local Player = game.Players.LocalPlayer
 
@@ -10,7 +11,9 @@ local Menu = {}
 Menu.Offset = 4
 Menu.YSize = 30
 Menu.Shade = 2
+Menu.BorderSize = 3
 Menu.FontSize = "Size14"
+Menu.LastDropDown = nil
 
 function Menu:Init()
 	local Scr = Instance.new("ScreenGui", Player.PlayerGui)
@@ -18,15 +21,15 @@ function Menu:Init()
 	self.Root = Scr
 	local bar = Instance.new("Frame", Scr)
 	bar.Size=UDim2.new(0,0,0,self.YSize)
-	bar.BorderSizePixel = 3
+	bar.BorderSizePixel = self.BorderSize
 	bar.BorderColor3 = Palette:Get("Default", "Shade4")
 	bar.BackgroundColor3 = Palette:Get("Default", "Shade2")
 	self.Bar = bar
 	-- create dropdown button
-	Menu:AddButton("V", "DropDown")
+	Menu:AddButton("V", "DropDown", {"Console", "Administration", "Server"})
 end
 
-function Menu:GetButton(type)
+function Menu:GetButton(type, openlist)
 	local DropDown = Instance.new("TextButton", self.Root)
 	local offset = self.YSize - self.Offset * 2
 	DropDown.BackgroundColor3 = Palette:Get("Complement")
@@ -36,8 +39,25 @@ function Menu:GetButton(type)
 	DropDown.Text = "V"
 	DropDown.BorderSizePixel = 0
 	SFX.Shade(DropDown,self.Shade)
-	if type == "DropDown" then 
-		-- create dropdown once clicked
+	if type == "DropDown" and openlist then 
+		DropDown.MouseButton1Click:connect(function()
+		if self.LastDropDown then
+			self.LastDropDown:Destroy()
+		end
+		local new = Instinct.Create(Instinct.Gui.DropDown)
+		self.LastDropDown = new
+		new:Create(self.Root, UDim2.new(0,0,0, self.YSize + self.BorderSize), Palette:Get("Default", "Shade1"), Palette:Get("Default", "Shade4"), 
+			{	which = DropDown,
+				left = false,
+				right = true,
+				up = false,
+				down = true,
+				bordersize = self.BorderSize,
+		})
+		for i,v in pairs(openlist) do 
+			new:AddButton(v)
+		end
+		end)
 	else 
 		-- negotiate with winserver
 		DropDown.MouseButton1Click:connect(function() 
@@ -47,8 +67,8 @@ function Menu:GetButton(type)
 	return DropDown
 end
 
-function Menu:AddButton(button_name, type)
-	local button = self:GetButton(type or "Window")
+function Menu:AddButton(button_name, type, openlist)
+	local button = self:GetButton(type or "Window", openlist)
 	button.Text = button_name
 	local max = 0
 	for i,v in pairs(self.Root:GetChildren()) do
