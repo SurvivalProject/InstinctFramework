@@ -17,6 +17,14 @@ function SFX.Shade(which, size)
 	
 end
 
+function SFX.RemoveShade(which)
+	for i,v in pairs(which:GetChildren()) do
+		if v:IsA("Frame") and v.Name == "Shade" then
+			v:Destroy()
+		end
+	end
+end
+
 function SFX.MakeBorder(which, left, right, up, down, color, bordersize)
 	function get()
 		local new = Instance.new("Frame", which)

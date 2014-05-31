@@ -7,6 +7,9 @@ local SFX = Instinct.Include("Gui/SFX")
 
 Window.Canvas = nil
 Window.Root = nil
+Window.DestroyOnClose = false
+Window.TitleFont = "ArialBold"
+Window.TitleFontSize = "Size18"
 
 local Player = game.Players.LocalPlayer
 
@@ -57,10 +60,40 @@ end
 
 function Window:Close()
 	self.Canvas.Visible = false
+	self.State = "Closed"
+	if self.Button then
+		self.Button.BackgroundColor3 = Palette:Get("Complement")
+	end
+	if self.CloseCallback then
+		self.CloseCallback()
+	end
+	if self.DestroyOnClose then
+		self.Canvas:Destroy()
+	end
 end
 
 function Window:Open()
 	self.Canvas.Visible = true
+	self.State = "Open"
+	print('xwn open')
+	if self.Button then
+		self.Button.BackgroundColor3 = Palette:Get("Shade1")
+	end
+	if self.OpenCallback then 
+		self.OpenCallback()
+	end
+end
+
+function Window:SetButton(Button)
+	self.Button = Button
+end
+
+function Window:Toggle()
+	if self.State == "Open" then
+		self:Close()
+	else
+		self:Open()
+	end
 end
 
 function Window:SetTitle(title)

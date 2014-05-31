@@ -6,14 +6,20 @@ function WindowServer.Notify(Window, StateChange)
 	
 end
 
-function WindowServer.RequestOpen(WindowName)
+function WindowServer.RequestOpen(WindowName, Button)
+	local new
 	if WindowServer.Windows[WindowName] then
-		WindowServer.Windows[WindowName]:Open()
+		WindowServer.Windows[WindowName]:Toggle()
 	else
-		local new = Instinct.Create(Instinct.Gui.Window)
+		new = Instinct.Create(Instinct.Gui.Window)
 		new:Create()
+		if Button then
+			new:SetButton(Button)
+		end
 		new:SetTitle(WindowName)
+		new:Open()
 		WindowServer.Windows[WindowName] = new
+
 	end
 	for i,v in pairs(WindowServer.Windows) do
 		if i ~= WindowName then
@@ -21,6 +27,7 @@ function WindowServer.RequestOpen(WindowName)
 			print("CLOSING")
 		end
 	end
+	return new
 end
 
 return WindowServer

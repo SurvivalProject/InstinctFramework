@@ -69,7 +69,7 @@ function DropDown:AddButton(text)
 	print(ysize)
 	self.Root.Size = UDim2.new(0,max_x, 0, ysize)
 	
-	new.MouseButton1Click:connect(function() print("click") end)
+	return new
 	
 end
 

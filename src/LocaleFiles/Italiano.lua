@@ -1,0 +1,7 @@
+local Locale = {
+
+	
+	
+}
+
+return Locale

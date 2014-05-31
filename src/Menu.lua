@@ -3,6 +3,7 @@ local Palette = Instinct.Include("Utilities/Palette")
 local SFX = Instinct.Include("Gui/SFX")
 local WindowServer = Instinct.Include("Gui/WindowServer")
 local DDMenu = Instinct.Include("Gui/DropDown")
+local DimTools = Instinct.Include("Gui/DimTools")
 
 local Player = game.Players.LocalPlayer
 
@@ -14,6 +15,7 @@ Menu.Shade = 2
 Menu.BorderSize = 3
 Menu.FontSize = "Size14"
 Menu.LastDropDown = nil
+Menu.LastDropDownButton = nil
 
 function Menu:Init()
 	local Scr = Instance.new("ScreenGui", Player.PlayerGui)
@@ -44,6 +46,11 @@ function Menu:GetButton(type, openlist)
 		if self.LastDropDown then
 			self.LastDropDown:Destroy()
 		end
+		if self.LastDropDownButton == DropDown then
+			self.LastDropDownButton = nil
+			return
+		end
+		self.LastDropDownButton = DropDown
 		local new = Instinct.Create(Instinct.Gui.DropDown)
 		self.LastDropDown = new
 		new:Create(self.Root, UDim2.new(0,0,0, self.YSize + self.BorderSize), Palette:Get("Default", "Shade1"), Palette:Get("Default", "Shade4"), 
@@ -55,13 +62,18 @@ function Menu:GetButton(type, openlist)
 				bordersize = self.BorderSize,
 		})
 		for i,v in pairs(openlist) do 
-			new:AddButton(v)
+			local NewButton = new:AddButton(v)
+			NewButton.MouseButton1Click:connect(function()
+				WindowServer.RequestOpen(NewButton.Text, NewButton)
+			end)
 		end
 		end)
 	else 
 		-- negotiate with winserver
+		local Window
 		DropDown.MouseButton1Click:connect(function() 
-			WindowServer.RequestOpen(DropDown.Text)
+			local xWindow = WindowServer.RequestOpen(DropDown.Text, DropDown)
+		
 		end)
 	end
 	return DropDown
@@ -78,7 +90,8 @@ function Menu:AddButton(button_name, type, openlist)
 	end
 	button.Position = UDim2.new(0,max,0,self.Offset)
 	local offset = self.YSize - self.Offset * 2
-	button.Size = UDim2.new(0, button.TextBounds.X + 10, 0, offset)
+	local x = DimTools.TextSize(button_name, button.Font, button.FontSize)
+	button.Size = UDim2.new(0, x + 10, 0, offset)
 	local nsize = max + button.Size.X.Offset + self.Offset + self.Shade
 	delay(1/30, function() self.Bar.Size = UDim2.new(0, nsize, 0, self.YSize) end)
 end

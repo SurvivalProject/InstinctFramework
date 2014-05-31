@@ -32,12 +32,14 @@ Instinct.Global = [=[
 Version
 Option
 Create
+Services/Locale
 ]=]
 
 Instinct.Client = [=[
 Menu
 Utilities/Palette
 Gui/Window
+Gui/SelectionMenu
 ]=]
 
 Instinct.Server = [=[
