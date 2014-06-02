@@ -81,8 +81,11 @@ function Create.Call(object)
 	end
 	new.__root = obj
 	setmetatable(new, Create)
-	if obj.Constructor then 
-		obj.Constructor(new)
+	for i,v in pairs(obj) do
+		print(i)
+	end
+	if new.Constructor then 
+		new:Constructor()
 	end
 	return new
 end

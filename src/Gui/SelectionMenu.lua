@@ -26,11 +26,11 @@ SelectionMenu.Colors = {
 	Palette:Get("Shade2", "Shade2"),
 }
 
-SelectionMenu.SelectionColor = Palette:Get("Shade1")
+SelectionMenu.SelectionColor = Palette:Get("Shade1", "Shade1")
 
 -- Shades the selection 
 -- >= selectionoffset to prevent overflows
-SelectionMenu.Shade = 4
+SelectionMenu.Shade = 0
 
 
 -- Horizontal total whitespace per selection
@@ -44,12 +44,20 @@ SelectionMenu.HorizontalWS = 10
 SelectionMenu.VerticalSpace = 5
 
 SelectionMenu.OKColor = Palette:Get("Complement")
+SelectionMenu.CreateOK = true
+
 
 SelectionMenu.TextWS = 10
 
+function SelectionMenu:Constructor()
+	
+	self.SelectionDone = Instinct.Create(Instinct.Event)
+end
+
+
 
 -- No tooltip supported yet
-function SelectionMenu:CreateWindow(ItemList, Title, DefaultSelection) 
+function SelectionMenu:CreateWindow(ItemList, Title, DefaultSelection, Description) 
 	assert(ItemList, "No itemlist provided")
 	local Window = Instinct.Create(Instinct.Gui.Window)	
 	Window.DestroyOnClose = true
@@ -92,20 +100,6 @@ function SelectionMenu:CreateWindow(ItemList, Title, DefaultSelection)
 	
 	
 	for i,v in pairs(ItemList) do
-		if i == #ItemList then
-			-- OK button
-			curry = curry - self.SelectionOffset + self.VerticalSpace
-			local cl = button:Clone()
-			cl.Parent = Window.Canvas
-			cl.Position = UDim2.new(0.5, -TextBounds["OK"]/2,0,curry)
-			cl.BackgroundColor3 = self.OKColor
-			cl.Text = "OK"
-			cl.Size = UDim2.new(0, TextBounds["OK"] + self.TextWS, 0, cl.Size.Y.Offset)
-			SFX.Shade(cl, self.Shade)
-			cl.MouseButton1Click:connect(function()
-				self.Done(true) -- and close window
-			end)
-		else
 			-- Selection Item
 			local color_index = ( i % 2 ) + 1
 			local color = self.Colors[color_index]
@@ -120,11 +114,24 @@ function SelectionMenu:CreateWindow(ItemList, Title, DefaultSelection)
 			end
 			cl.MouseButton1Click:connect(function() self:ChangeSelection(cl) end)
 			curry = curry + cl.Size.Y.Offset + self.SelectionOffset
-		end
+	end
+	if self.CreateOK then 
+				-- OK button
+			curry = curry - self.SelectionOffset + self.VerticalSpace
+			local cl = button:Clone()
+			cl.Parent = Window.Canvas
+			cl.Position = UDim2.new(0.5, -TextBounds["OK"]/2,0,curry)
+			cl.BackgroundColor3 = self.OKColor
+			cl.Text = "OK"
+			cl.Size = UDim2.new(0, TextBounds["OK"] + self.TextWS, 0, cl.Size.Y.Offset)
+			SFX.Shade(cl, self.Shade)
+			cl.MouseButton1Click:connect(function()
+				self:Done(true) -- and close window
+			end)
 	end
 	self.Window = Window
 	Window.CloseCallback = function()
-		self.Done(false)
+		self:Done(false)
 	end
 end
 
@@ -142,9 +149,14 @@ end
 
 
 function SelectionMenu:Done(do_window_close)
-	print("Selection done: "..self.SelectedText)
-	if do_window_close then
-		self.Window:Close()
+	print("wut done")
+	if not self.CycleDone then 
+		self.CycleDone = true
+		print("Selection done: "..self.SelectedText)
+		self.SelectionDone:fire(self.SelectedText)
+		if do_window_close then
+			self.Window:Close()
+		end
 	end
 end
 

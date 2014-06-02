@@ -28,7 +28,7 @@ function Menu:Init()
 	bar.BackgroundColor3 = Palette:Get("Default", "Shade2")
 	self.Bar = bar
 	-- create dropdown button
-	Menu:AddButton("V", "DropDown", {"Console", "Administration", "Server"})
+	
 end
 
 function Menu:GetButton(type, openlist)

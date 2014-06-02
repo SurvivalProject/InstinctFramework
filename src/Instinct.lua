@@ -33,6 +33,7 @@ Version
 Option
 Create
 Services/Locale
+Event
 ]=]
 
 Instinct.Client = [=[
