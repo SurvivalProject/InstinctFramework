@@ -86,7 +86,7 @@ function SelectionMenu:CreateWindow(ItemList, Title, DefaultSelection, Descripti
 	chk "OK"	
 	
 	local TitleSizeMinimum = DimTools.TextSize(Title or "Select an item...", Window.TitleFont, Window.TitleFontSize)
-	print(TitleSizeMinimum * 0.5, max)
+
 	if (TitleSizeMinimum) * 0.5 > max then
 		max = TitleSizeMinimum * 2
 	end
@@ -149,10 +149,8 @@ end
 
 
 function SelectionMenu:Done(do_window_close)
-	print("wut done")
 	if not self.CycleDone then 
 		self.CycleDone = true
-		print("Selection done: "..self.SelectedText)
 		self.SelectionDone:fire(self.SelectedText)
 		if do_window_close then
 			self.Window:Close()

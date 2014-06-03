@@ -37,6 +37,7 @@ Event
 ]=]
 
 Instinct.Client = [=[
+Console
 Menu
 Utilities/Palette
 Gui/Window
@@ -47,6 +48,8 @@ Instinct.Server = [=[
 Utilities/ColorTools
 Utilities/Palette
 ]=]
+
+
 
 local root = game:GetService("ReplicatedStorage").Instinct
 
@@ -77,7 +80,7 @@ function Instinct.Load(List, only)
 		end
 		if newroot and newroot:IsA("ModuleScript") and previous then 
 			local Name = newroot.Name
-			print("[Instinct Info] Load: "..Name, newroot:GetFullName())
+			print("Info", "Load: "..Name, newroot:GetFullName())
 			local out = require(newroot)
 			if type(out) == "table" and Instinct.Create and not out.__noreg then
 				Instinct.Create.Register(out)
@@ -88,7 +91,7 @@ function Instinct.Load(List, only)
 				return out
 			end
 		else
-			print("[Instinct Error] [Load]: Unable to load module: "..ModuleName..", module does not exist!")
+			print("Error", "Load: Unable to load module: "..ModuleName..", module does not exist!")
 		end
 	end
 end

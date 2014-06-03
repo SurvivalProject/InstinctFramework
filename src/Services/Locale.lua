@@ -5,11 +5,11 @@ Locale.Default = "English"
 Locale.Selected = "English"
 
 Locale.AvailableLocales = {
-	"Francais",
-	"Deutsch",
+	--"Francais",
+	--"Deutsch",
 	"English",
-	"Espanol",
-	"Italiano",	
+	--"Espanol",
+	--"Italiano",	
 	"Nederlands",
 }
 

@@ -29,12 +29,35 @@
 &#9;Option
 &#9;Purpose:
 &#9;&#9;Create Option functions
+&#9;&#9;Similiar to roblox enums
+&#9;&#9;The name &quot;Option&quot; is chosen in order to prevent confusion
+&#9;&#9;Roblox uses enums
+&#9;&#9;Instinct uses options
 &#9;
 --]]
 
-local OPTIONS = {}
+-- DEFINE ALL OPTIONS HERE!
+
+local Options = {}
+
+local opt_meta = {}
+
+function opt_meta:__tostring()
+&#9;return &quot;Option.&quot;..self[1]..self[2]
+end
+
+function Options.New(option_type, option_list)
+&#9;Options[option_type] = {}
+&#9;for i,v in pairs(option_list) do
+&#9;&#9;Options[option_type][v] = {option_type, v}
+&#9;&#9;Options[option_type][i] = Options[option_type][v]
+&#9;&#9;setmetatable(Options[option_type][v], opt_meta) -- tostring
+&#9;end
+end
 
 -- 
+
+Options.New(&quot;ConsolePriority&quot;, {&quot;Low&quot;, &quot;Normal&quot;, &quot;High&quot;, &quot;Extreme&quot;})
 
 return true</ProtectedString>
 			</Properties>
@@ -83,6 +106,7 @@ Event
 ]=]
 
 Instinct.Client = [=[
+Console
 Menu
 Utilities/Palette
 Gui/Window
@@ -93,6 +117,8 @@ Instinct.Server = [=[
 Utilities/ColorTools
 Utilities/Palette
 ]=]
+
+
 
 local root = game:GetService(&quot;ReplicatedStorage&quot;).Instinct
 
@@ -123,7 +149,7 @@ function Instinct.Load(List, only)
 &#9;&#9;end
 &#9;&#9;if newroot and newroot:IsA(&quot;ModuleScript&quot;) and previous then 
 &#9;&#9;&#9;local Name = newroot.Name
-&#9;&#9;&#9;print(&quot;[Instinct Info] Load: &quot;..Name, newroot:GetFullName())
+&#9;&#9;&#9;print(&quot;Info&quot;, &quot;Load: &quot;..Name, newroot:GetFullName())
 &#9;&#9;&#9;local out = require(newroot)
 &#9;&#9;&#9;if type(out) == &quot;table&quot; and Instinct.Create and not out.__noreg then
 &#9;&#9;&#9;&#9;Instinct.Create.Register(out)
@@ -134,7 +160,7 @@ function Instinct.Load(List, only)
 &#9;&#9;&#9;&#9;return out
 &#9;&#9;&#9;end
 &#9;&#9;else
-&#9;&#9;&#9;print(&quot;[Instinct Error] [Load]: Unable to load module: &quot;..ModuleName..&quot;, module does not exist!&quot;)
+&#9;&#9;&#9;print(&quot;Error&quot;, &quot;Load: Unable to load module: &quot;..ModuleName..&quot;, module does not exist!&quot;)
 &#9;&#9;end
 &#9;end
 end
@@ -191,11 +217,11 @@ Locale.Default = &quot;English&quot;
 Locale.Selected = &quot;English&quot;
 
 Locale.AvailableLocales = {
-&#9;&quot;Francais&quot;,
-&#9;&quot;Deutsch&quot;,
+&#9;--&quot;Francais&quot;,
+&#9;--&quot;Deutsch&quot;,
 &#9;&quot;English&quot;,
-&#9;&quot;Espanol&quot;,
-&#9;&quot;Italiano&quot;,&#9;
+&#9;--&quot;Espanol&quot;,
+&#9;--&quot;Italiano&quot;,&#9;
 &#9;&quot;Nederlands&quot;,
 }
 
@@ -318,9 +344,6 @@ function Create.Call(object)
 &#9;end
 &#9;new.__root = obj
 &#9;setmetatable(new, Create)
-&#9;for i,v in pairs(obj) do
-&#9;&#9;print(i)
-&#9;end
 &#9;if new.Constructor then 
 &#9;&#9;new:Constructor()
 &#9;end
@@ -380,7 +403,7 @@ return Create</ProtectedString>
 
 
 local ct = Instinct.Include(&quot;Utilities/ColorTools&quot;)
-print(ct)
+
 local rgb = ct.RGBToColor3
 
 
@@ -413,6 +436,10 @@ Palette.Data = {
 &#9;&#9;Shade3 = rgb(119, 25, 25),
 &#9;&#9;Shade4 = rgb( 78,  3,  3),
 &#9;},
+&#9;Console = {
+&#9;&#9;Default = rgb(0,0,0),
+&#9;&#9;Text = rgb(255,255,255),
+&#9;},
 &#9;Text = {
 &#9;&#9;Default = rgb(0,0,0),
 &#9;&#9;White = rgb(255,255,255)
@@ -426,7 +453,34 @@ Palette.Data = {
 &#9;},
 &#9;SFX = {
 &#9;&#9;Default = rgb(0,0,0), -- shade color
+&#9;},
+&#9;ColorLabel = { -- colorlabel tags!
+&#9;&#9;black = rgb(0,0,0),
+&#9;&#9;red = rgb(128,0,0),
+&#9;&#9;green = rgb(0,128,0),
+&#9;&#9;yellow = rgb(128,128,0),
+&#9;&#9;blue = rgb(0,0,128),
+&#9;&#9;purple = rgb(128,0,128),
+&#9;&#9;cyan = rgb(0,128,128),
+&#9;&#9;white = rgb(192,192,192)
+&#9;&#9;
+&#9;&#9;
+&#9;},
+&#9;ColorLabelLight = {
+&#9;&#9;black = rgb(128,128,128),
+&#9;&#9;red = rgb(255,0,0),
+&#9;&#9;green = rgb(0,255,0),
+&#9;&#9;yellow = rgb(255,255,0),
+&#9;&#9;blue = rgb(0,0,255),
+&#9;&#9;purple = rgb(255,0,255),
+&#9;&#9;cyan = rgb(0,255,255),
+&#9;&#9;white = rgb(255,255,255)&#9;&#9;
+&#9;&#9;
 &#9;}
+&#9;
+&#9;
+&#9;--[[ 0 #000000  1 #800000  2 #008000  3 #808000  4 #000080  5 #800080  6 #008080  7 #c0c0c0
+ 8 #808080  9 #ff0000 10 #00ff00 11 #ffff00 12 #0000ff 13 #ff00ff 14 #00ffff 15 #ffffff--]]
 }
 
 function Palette:Get(Type, Which)
@@ -437,6 +491,10 @@ function Palette:Get(Type, Which)
 &#9;else 
 &#9;&#9;return self.Data.Default[Which] or self.Data.Default.Default
 &#9;end
+end
+
+function Palette:GetRaw(Type, Which) -- can return nil! raw checks
+&#9;return self.Data[Type] and self.Data[Type][Which]
 end
 
 return Palette</ProtectedString>
@@ -456,16 +514,63 @@ end
 return ColorTools</ProtectedString>
 				</Properties>
 			</Item>
+			<Item class="Script" referent="RBX9">
+				<Properties>
+					<bool name="Disabled">false</bool>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">Date</string>
+					<ProtectedString name="Source">local Date = {}
+
+Date.Constants = {
+&#9;millisecond = 0.001,
+&#9;second = 1,
+&#9;minute = second * 60,
+&#9;hour = minute * 60,
+&#9;day = hour * 24,
+&#9;week = day * 7,
+&#9;year = day * 365,
+&#9;lyear = day * 366,
+&#9;lsyear = day * 366 + second,
+&#9;syear = day * 365,
+}
+
+Date.Months = {
+&#9;{&quot;Jan&quot;, 31}, {&quot;Feb&quot;, 28},
+&#9;{&quot;Mar&quot;, 31}, {&quot;Apr&quot;, 30},
+&#9;{&quot;May&quot;, 31}, {&quot;Jun&quot;, 31},
+&#9;{&quot;Jul&quot;, 31}, {&quot;Aug&quot;, 30},
+&#9;{&quot;Sep&quot;, 31}, {&quot;Oct&quot;, 30},
+&#9;{&quot;Nov&quot;, 31}, {&quot;Dec&quot;, 30}&#9;
+}
+
+Date.Start = 30 * Date.Constants.year + 7 * Date.Constants.day -- 2000 start
+
+function Date.YearIsLeap(year) -- a full year
+&#9;return (year % 4) == 0
+end
+
+function Date.UnixToDate(time)
+&#9;local time = math.floor( ( time or os.time() ) + 0.5)
+&#9;-- 1 january 1970 00:00:00 -&gt; 0
+&#9;local from2000 = time - Date.Start
+&#9;
+&#9;local yearsleft = from2000 % ( Date.Constants.year&#9;)
+&#9;from2000 = from2000 - yearsleft * Date.Constants.year
+&#9;
+&#9;
+end</ProtectedString>
+				</Properties>
+			</Item>
 		</Item>
-		<Item class="Script" referent="RBX9">
+		<Item class="Script" referent="RBX10">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Version</string>
-				<ProtectedString name="Source">return &quot;0.0.188&quot;</ProtectedString>
+				<ProtectedString name="Source">return &quot;0.0.268&quot;</ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="Model" referent="RBX10">
+		<Item class="Model" referent="RBX11">
 			<Properties>
 				<CoordinateFrame name="ModelInPrimary">
 					<X>0</X>
@@ -484,17 +589,56 @@ return ColorTools</ProtectedString>
 				<string name="Name">Gui</string>
 				<Ref name="PrimaryPart">null</Ref>
 			</Properties>
-			<Item class="Script" referent="RBX11">
+			<Item class="Script" referent="RBX12">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
 					<string name="Name">ButtonBar</string>
 					<ProtectedString name="Source">local ButtonBar = {}
 
+local Dim = Instinct.Include &quot;Gui/DimTools&quot;
+local Presets = Instinct.Include &quot;Gui/GuiPresets&quot;
+
+ButtonBar.Font = &quot;ArialBold&quot;
+ButtonBar.FontSize = &quot;Size12&quot;
+ButtonBar.WhiteSpace = 5
+ButtonBar.Shade = 2
+ButtonBar.TextWhiteSpace = 10 -- total whitespace
+
+function ButtonBar:Init(where, pos, size)
+&#9;local frame = Instance.new(&quot;Frame&quot;, where)
+&#9;frame.ClipsDescendants = true
+&#9;frame.BackgroundTransparency = 1
+&#9;local x_size, y_size = Dim.TextSize(&quot;test&quot;, self.Font, self.FontSize)
+&#9;frame.Size = size or UDim2.new(1,0, 0, y_size + self.Shade)
+&#9;frame.Position = pos or UDim2.new(0,0,0,0)
+&#9;self.Root = frame
+end
+
+
+function ButtonBar:AddButton(name)
+&#9;local button = Presets.Button(self.Shade)
+&#9;button.Parent = self.Root
+&#9;local max_x = -math.huge
+&#9;for i,v in pairs(self.Root:GetChildren()) do
+&#9;&#9;if v.Position.X.Offset + v.AbsoluteSize.X &gt; max_x then
+&#9;&#9;&#9;max_x = v.Position.X.Offset + v.AbsoluteSize.X
+&#9;&#9;end
+&#9;end
+&#9;
+&#9;local new = max_x + self.WhiteSpace
+&#9;local size, ysize = Dim.TextSize(name, self.Font, self.FontSize)
+&#9;button.Size = UDim2.new(0, size + self.TextWhiteSpace, 0, ysize)
+&#9;button.Position = UDim2.new(0,new,0,0)
+&#9;button.Text = name 
+&#9;
+&#9;return button
+end
+
 return ButtonBar</ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Script" referent="RBX12">
+			<Item class="Script" referent="RBX13">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
@@ -520,17 +664,19 @@ function DimTools.TextSize(text, font, fontsize)
 &#9;my.FontSize = fontsize
 &#9;my.Text = text
 &#9;my.Font = font
-&#9;if my.TextBounds.X == 0 or my.TextBounds.Y == 0 then
+&#9;if my.TextBounds.X &lt;= 0.99 or my.TextBounds.Y &lt;= 0.99 then
 &#9;&#9;repeat wait(1/60) 
-&#9;&#9;until my.TextBounds.X ~= 0 and my.TextBounds.Y ~= 0
+&#9;&#9;until my.TextBounds.X &gt;0.99 and my.TextBounds.Y &gt;0.99
 &#9;end
-&#9;return my.TextBounds.X, my.TextBounds.Y
+&#9;local x = my.TextBounds.X
+&#9;local y = my.TextBounds.Y
+&#9;return x, y
 end
 
 return DimTools</ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Script" referent="RBX13">
+			<Item class="Script" referent="RBX14">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
@@ -561,7 +707,6 @@ function WindowServer.RequestOpen(WindowName, Button)
 &#9;for i,v in pairs(WindowServer.Windows) do
 &#9;&#9;if i ~= WindowName then
 &#9;&#9;&#9;v:Close()
-&#9;&#9;&#9;print(&quot;CLOSING&quot;)
 &#9;&#9;end
 &#9;end
 &#9;return new
@@ -570,7 +715,7 @@ end
 return WindowServer</ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Script" referent="RBX14">
+			<Item class="Script" referent="RBX15">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
@@ -652,7 +797,6 @@ end
 function Window:Open()
 &#9;self.Canvas.Visible = true
 &#9;self.State = &quot;Open&quot;
-&#9;print(&apos;xwn open&apos;)
 &#9;if self.Button then
 &#9;&#9;self.Button.BackgroundColor3 = Palette:Get(&quot;Shade1&quot;)
 &#9;end
@@ -680,7 +824,7 @@ end
 return Window</ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Script" referent="RBX15">
+			<Item class="Script" referent="RBX16">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
@@ -753,7 +897,7 @@ end
 return SFX</ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Script" referent="RBX16">
+			<Item class="Script" referent="RBX17">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
@@ -779,11 +923,9 @@ function DropDown:Create(Parent, Position, BackgroundC3, BorderC3, BorderSize)
 &#9;&#9;for i,v in pairs(need) do 
 &#9;&#9;&#9;if BorderSize[v] == nil then 
 &#9;&#9;&#9;&#9;wrong = true
-&#9;&#9;&#9;&#9;print(v)
 &#9;&#9;&#9;&#9;break
 &#9;&#9;&#9;end
 &#9;&#9;end
-&#9;&#9;print(wrong, BorderSize.which)
 &#9;&#9;if not wrong then
 &#9;&#9;&#9;SFX.MakeBorder(new, BorderSize.left, BorderSize.right, BorderSize.up, BorderSize.down, BorderC3, BorderSize.bordersize)
 &#9;&#9;end
@@ -807,7 +949,6 @@ function DropDown:AddButton(text)
 &#9;new.Text = text
 &#9;new.FontSize = &quot;Size12&quot;
 &#9;local xt, yt = Dim.TextSize(text, &quot;ArialBold&quot;, &quot;Size12&quot;)
-&#9;print(xt, &quot;hi&quot;)
 &#9;new.Size = UDim2.new(0, xt + self.TextOffset * 2, 0, new.Size.Y.Offset)
 &#9;new.Position = UDim2.new(0, self.XOffset, 0, ypos)
 &#9;new.Parent = self.Root
@@ -826,7 +967,6 @@ function DropDown:AddButton(text)
 &#9;&#9;end
 &#9;end
 &#9;local ysize = ypos + new.Size.Y.Offset + self.Shade + self.YOffset
-&#9;print(ysize)
 &#9;self.Root.Size = UDim2.new(0,max_x, 0, ysize)
 &#9;
 &#9;return new
@@ -841,7 +981,7 @@ end
 return DropDown</ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Script" referent="RBX17">
+			<Item class="Script" referent="RBX18">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
@@ -850,6 +990,7 @@ return DropDown</ProtectedString>
 
 local Palette = Instinct.Include(&quot;Utilities/Palette&quot;)
 local SFX = Instinct.Include(&quot;Gui/SFX&quot;)
+local Dim = Instinct.Include &quot;Gui/DimTools&quot;
 
 function GuiPresets.Button(shade)
 &#9;local DropDown = Instance.new(&quot;TextButton&quot;)
@@ -866,6 +1007,33 @@ function GuiPresets.Button(shade)
 &#9;return DropDown
 end
 
+-- for easy creationz
+-- returns button, xsize, ysize
+-- omg it so awesome
+function GuiPresets.CustomButton(ButtonText, ButtonShade, ButtonFont, ButtonFontSize, TextColor, BackgroundColor, WhiteSpace)
+&#9;local ButtonText = ButtonText or &quot;&quot;
+&#9;local ButtonShade = ButtonShade or 0
+&#9;local ButtonFont = ButtonFont or &quot;ArialBold&quot;
+&#9;local ButtonFontSize = ButtonFontSize or &quot;Size12&quot;
+&#9;local TextColor = TextColor or Palette:Get(&quot;Text&quot;)
+&#9;local BackgroundColor = BackgroundColor or Palette:Get(&quot;Complement&quot;)
+&#9;local WhiteSpace = WhiteSpace or 10&#9;
+&#9;local new = Instance.new(&quot;TextButton&quot;)
+&#9;new.Text = ButtonText
+&#9;new.Font = ButtonFont
+&#9;new.FontSize = ButtonFontSize
+&#9;new.TextColor3 = TextColor
+&#9;new.BackgroundColor3 = BackgroundColor
+&#9;if ButtonShade &gt; 0 then
+&#9;&#9;SFX.Shade(new, ButtonShade)
+&#9;end
+&#9;local size_x , size_y = Dim.TextSize(ButtonText, ButtonFont, ButtonFontSize)
+&#9;local rs = size_x + WhiteSpace
+&#9;new.Size = UDim2.new(0, rs, 0, size_y)
+&#9;return new, rs, size_y 
+&#9;
+end
+
 function GuiPresets.Canvas(color)
 &#9;local canvas = Instance.new(&quot;Frame&quot;)
 &#9;canvas.BackgroundColor3 = color or Palette:Get()
@@ -873,11 +1041,20 @@ function GuiPresets.Canvas(color)
 &#9;return canvas
 end
 
+function GuiPresets.Backdrop(bsize)
+&#9;local bar = Instance.new(&quot;Frame&quot;)
+&#9;bar.Size=UDim2.new(0,0,0,0)
+&#9;bar.BorderSizePixel = bsize
+&#9;bar.BorderColor3 = Palette:Get(&quot;Default&quot;, &quot;Shade4&quot;)
+&#9;bar.BackgroundColor3 = Palette:Get(&quot;Default&quot;, &quot;Shade2&quot;)&#9;
+&#9;return bar
+end
+
 
 return GuiPresets</ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Script" referent="RBX18">
+			<Item class="Script" referent="RBX19">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
@@ -970,7 +1147,7 @@ function SelectionMenu:CreateWindow(ItemList, Title, DefaultSelection, Descripti
 &#9;chk &quot;OK&quot;&#9;
 &#9;
 &#9;local TitleSizeMinimum = DimTools.TextSize(Title or &quot;Select an item...&quot;, Window.TitleFont, Window.TitleFontSize)
-&#9;print(TitleSizeMinimum * 0.5, max)
+
 &#9;if (TitleSizeMinimum) * 0.5 &gt; max then
 &#9;&#9;max = TitleSizeMinimum * 2
 &#9;end
@@ -1033,10 +1210,8 @@ end
 
 
 function SelectionMenu:Done(do_window_close)
-&#9;print(&quot;wut done&quot;)
 &#9;if not self.CycleDone then 
 &#9;&#9;self.CycleDone = true
-&#9;&#9;print(&quot;Selection done: &quot;..self.SelectedText)
 &#9;&#9;self.SelectionDone:fire(self.SelectedText)
 &#9;&#9;if do_window_close then
 &#9;&#9;&#9;self.Window:Close()
@@ -1047,8 +1222,180 @@ end
 return SelectionMenu </ProtectedString>
 				</Properties>
 			</Item>
+			<Item class="Script" referent="RBX20">
+				<Properties>
+					<bool name="Disabled">false</bool>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">ScrollText</string>
+					<ProtectedString name="Source">local ScrollText = {}
+
+local Window = Instinct.Include &quot;Gui/Window&quot;
+local Palette = Instinct.Include &quot;Utilities/Palette&quot;
+local Dim = Instinct.Include &quot;Gui/DimTools&quot;
+local ColorLabel = Instinct.Include &quot;Gui/ColorLabel&quot;
+
+
+ScrollText.Font = &quot;ArialBold&quot;
+ScrollText.FontSize = &quot;Size12&quot;
+
+ScrollText.TextColor = Palette:Get(&quot;TextColor&quot;, &quot;Black&quot;)
+
+function ScrollText:Create(where, size, pos)
+&#9;local new = Instance.new(&quot;Frame&quot;, where)
+&#9;new.Size = size or UDim2.new(1,0,1,0)
+&#9;new.Position = pos or UDim2.new(0,0,0,0)
+&#9;new.ClipsDescendants = true
+&#9;new.BackgroundTransparency = 1
+&#9;self.Root = new
+end
+
+function ScrollText:CreateWindow(size)
+&#9;
+end
+
+function ScrollText:Push(txt, tcolor)
+&#9;local new = Instinct.Create(ColorLabel)
+&#9;new.FontSize = self.FontSize
+&#9;new.DefaultColor = tcolor or Palette:Get &quot;Text&quot;
+&#9;new = new:GetLabel(txt, tcolor or Palette:Get(&quot;Text&quot;))
+&#9;new.Position = UDim2.new(0, 0, 1, 0)
+&#9;new.Parent = self.Root
+&#9;local size_x, size_y = Dim.TextSize(&quot;test&quot;, self.Font, self.FontSize)
+&#9;for i,v in pairs(self.Root:GetChildren()) do
+&#9;&#9;v.Position = v.Position - UDim2.new(0,0,0,size_y)
+&#9;&#9;if v.Position.Y.Offset &lt; -v.Parent.AbsoluteSize.Y then
+&#9;&#9;&#9;v:Destroy()
+&#9;&#9;end
+&#9;end
+end
+
+return ScrollText</ProtectedString>
+				</Properties>
+			</Item>
+			<Item class="Script" referent="RBX21">
+				<Properties>
+					<bool name="Disabled">false</bool>
+					<Content name="LinkedSource"><null></null></Content>
+					<string name="Name">ColorLabel</string>
+					<ProtectedString name="Source">local ColorLabel = {}
+
+local Palette = Instinct.Include &quot;Utilities/Palette&quot;
+local Dim = Instinct.Include &quot;Gui/DimTools&quot;
+
+ColorLabel.FontSize = &quot;Size12&quot;
+ColorLabel.Font = &quot;Arial&quot;
+ColorLabel.BoldFont = &quot;ArialBold&quot;
+
+ColorLabel.DefaultColor = Palette:Get(&quot;Text&quot;)
+
+-- Parsing:
+-- default escape; %{red light bold}
+
+function ColorLabel:GetElementList(txt)
+&#9;-- returns a table with elements to build labels from
+&#9;-- ret: {txt, font, fontcolor}
+&#9;local out = {}
+&#9;local dmode = {self.Font, self.DefaultColor} -- default mode
+&#9;local cmode = dmode -- current mode
+&#9;local last
+&#9;for match, newmode in string.gmatch(txt, &quot;([^%%]*)(%b%})&quot;) do
+&#9;&#9;last = newmode
+&#9;&#9;table.insert(out, {match, cmode[1], cmode[2]}) --unpack(cmode)
+&#9;&#9;cmode = {}
+&#9;&#9;local elements = {} -- elements provided;
+&#9;&#9;for element in string.gmatch(newmode, &quot;[^{} ]+&quot;) do
+&#9;&#9;&#9;elements[element:lower()] = true
+&#9;&#9;end
+&#9;&#9;if not elements.reset then 
+&#9;&#9;&#9;if elements.bold then
+&#9;&#9;&#9;&#9;cmode[1] = self.BoldFont
+&#9;&#9;&#9;&#9;elements.bold = nil
+&#9;&#9;&#9;else
+&#9;&#9;&#9;&#9;cmode[1] = self.Font
+&#9;&#9;&#9;end
+&#9;&#9;&#9;local palette = &quot;ColorLabel&quot;
+&#9;&#9;&#9;if elements.light then
+&#9;&#9;&#9;&#9;palette = &quot;ColorLabelLight&quot;
+&#9;&#9;&#9;&#9;elements.light = nil
+&#9;&#9;&#9;end
+&#9;&#9;&#9;for i,v in pairs(elements) do
+&#9;&#9;&#9;&#9;local color = Palette:Get(palette, i) 
+&#9;&#9;&#9;&#9;if color then 
+&#9;&#9;&#9;&#9;&#9;cmode[2] = color
+&#9;&#9;&#9;&#9;end
+&#9;&#9;&#9;end
+&#9;&#9;else 
+&#9;&#9;&#9;cmode = dmode
+&#9;&#9;end
+&#9;&#9;if not cmode[2] then
+&#9;&#9;&#9;cmode[2] = self.DefaultColor
+&#9;&#9;end
+&#9;end
+&#9;local tail 
+&#9;if last then 
+&#9;&#9;tail = txt:match(&quot;%&quot;..last..&quot;(.-)$&quot;)
+&#9;&#9;local test = tail
+&#9;&#9;local loop = 0
+&#9;&#9;while test do
+&#9;&#9;&#9;test = tail:match(&quot;%&quot;..last..&quot;(.-)$&quot;)
+&#9;&#9;&#9;if test then
+&#9;&#9;&#9;&#9;tail = test
+&#9;&#9;&#9;end
+&#9;&#9;&#9;loop = loop + 1
+&#9;&#9;&#9;if loop &gt; 50 then 
+&#9;&#9;&#9;&#9;break
+&#9;&#9;&#9;end
+&#9;&#9;end 
+&#9;end
+
+&#9;if not tail then
+&#9;&#9;tail = txt -- no escapes provided, kthen
+&#9;end
+&#9;table.insert(out, {tail, cmode[1], cmode[2]})
+&#9;return out
+&#9;
+&#9;
+end
+
+
+function ColorLabel:GetLabel(txt,c)
+&#9;if c then
+&#9;&#9;self.DefaultColor = c
+&#9;end
+&#9;local list = self:GetElementList(txt)
+&#9;local root
+&#9;local x = 0 -- offsetz
+&#9;local function newlabel(text, font, color)
+&#9;&#9;local new = Instance.new(&quot;TextLabel&quot;, root)
+
+&#9;&#9;local xsize, ysize = Dim.TextSize(text, font, self.FontSize)
+&#9;&#9;new.Size = UDim2.new(0,xsize,0,ysize)
+&#9;&#9;new.TextColor3 = color
+&#9;&#9;new.Text = text
+&#9;&#9;new.Font = font
+&#9;&#9;new.FontSize = self.FontSize
+&#9;&#9;new.BackgroundTransparency = 1
+&#9;&#9;new.Position = UDim2.new(1,x,0,0)
+&#9;&#9;if not root then
+&#9;&#9;&#9;root = new
+&#9;&#9;else 
+&#9;&#9;&#9;x = x + xsize
+&#9;&#9;end
+&#9;end
+&#9;for item_id, item_data in pairs(list) do
+&#9;&#9;local Text = item_data[1]
+&#9;&#9;local Font = item_data[2]
+&#9;&#9;local Color = item_data[3]
+&#9;&#9;newlabel(Text, Font, Color)
+&#9;end
+&#9;return root
+end
+
+return ColorLabel</ProtectedString>
+				</Properties>
+			</Item>
 		</Item>
-		<Item class="Script" referent="RBX19">
+		<Item class="Script" referent="RBX22">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -1154,61 +1501,125 @@ end
 return Menu </ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="Script" referent="RBX20">
+		<Item class="Script" referent="RBX23">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
-				<string name="Name">Script</string>
-				<ProtectedString name="Source">local Event = {}
+				<string name="Name">Console</string>
+				<ProtectedString name="Source">local Console = {}
 
-local meta = {}
-meta.__call = function()
-&#9;local new = {}&#9;
-&#9;return setmetatable(new, meta)
+local Palette = Instinct.Include &quot;Utilities/Palette&quot;
+local ScrollText = Instinct.Include &quot;Gui/ScrollText&quot;
+local ButtonBar = Instinct.Include &quot;Gui/ButtonBar&quot;
+local Dim = Instinct.Include &quot;Gui/DimTools&quot;
+
+local Player = game.Players.LocalPlayer
+
+Console.Seperator = &quot; :: &quot;
+Console.Ready = false
+
+function Console.Initialize()
+&#9;if Console.Ready then
+&#9;&#9;return
+&#9;end
+&#9;local new = Instance.new(&quot;ScreenGui&quot;, Player.PlayerGui)
+&#9;new.Name = &quot;Console&quot;
+
+&#9;local fr = Instance.new(&quot;Frame&quot;, new)
+&#9;fr.BackgroundColor3 = Palette:Get(&quot;Shade1&quot;, &quot;Shade4&quot;)
+&#9;fr.Size = UDim2.new(1,0,1,0)
+&#9;fr.Name = &quot;Outer&quot;
+&#9;fr.BorderSizePixel = 0
+&#9;local win = Instance.new(&quot;Frame&quot;, fr)
+&#9;win.Size = UDim2.new(1,-80,1,-80)
+&#9;win.Position = UDim2.new(0,40,0,40)
+&#9;win.BackgroundColor3 = Palette:Get(&quot;Console&quot;)
+&#9;win.Name = &quot;Inner&quot;
+&#9;Console.CRoot = new
+&#9;Console.TerminalWindow = win
+&#9;-- Create tab bar
+&#9;local new = Instinct.Create(Instinct.Gui.ButtonBar)
+&#9;local size_x, size_y = Dim.TextSize(&quot;test&quot;, new.Font, new.FontSize)
+&#9;new:Init(Console.CRoot, UDim2.new(0,40, 1, -38), UDim2.new(1,-80,0,size_y + new.Shade))
+&#9;Console.ButtonDock = new
+&#9;Console.Tabs = {}
+&#9;Console.Ready = true
 end
 
-meta.__index = Event
+function Console.Open()
+&#9;Console.CRoot.Visible = true
+end
 
-local Connection = {}
+function Console.Close()
+&#9;Console.CRoot.Visible = false
+end
 
-function Connection:disconnect()
-&#9;for i,v in pairs(self.Root.ConnectionList) do 
-&#9;&#9;if v == self.func then 
-&#9;&#9;&#9;self.Root.ConnectionList[i] = nil
-&#9;&#9;&#9;break
-&#9;&#9;end
+function Console.Write(tab, prio, ...)
+&#9;-- figure out if prio is an option or just text
+&#9;--&gt; assertion: if prio is a table then it is an option!
+&#9;if not Console.Tabs[tab] then
+&#9;&#9;Console.CreateTab(tab)
 &#9;end
+&#9;local args
+&#9;if type(prio) == &quot;table&quot; then
+&#9;&#9;args = {...}
+&#9;&#9;if prio == Instinct.Option.ConsolePriority.Extreme then 
+&#9;&#9;&#9;-- MASTER WARNING open up the console
+&#9;&#9;&#9;Console.Open()
+&#9;&#9;end
+&#9;else 
+&#9;&#9;args = {prio, ...}
+&#9;end
+&#9;local t_args = {}
+&#9;for i,v in pairs(args) do
+&#9;&#9;t_args[i] = tostring(v)
+&#9;end
+&#9;local str = table.concat(t_args, Console.Seperator)
+&#9;Console.Tabs[tab][1]:Push(&quot;[ %{light cyan bold} &quot;..math.floor(os.time() + 0.5)..&quot; %{reset}] &quot;..str, Palette:Get(&quot;ColorLabel&quot;, &quot;white&quot;))
+end
+
+function Console.OpenTab(tab)
+&#9;if Console.TabOpen then
+&#9;&#9;Console.Tabs[Console.TabOpen][1].Root.Visible = false
+&#9;&#9;Console.Tabs[Console.TabOpen][2].BackgroundColor3 = Palette:Get(&quot;Complement&quot;)
+&#9;end
+&#9;if Console.Tabs[tab] then
+&#9;&#9;Console.TabOpen = tab
+&#9;&#9;Console.Tabs[tab][1].Root.Visible = true
+&#9;&#9;Console.Tabs[tab][2].BackgroundColor3 = Palette:Get(&quot;Shade1&quot;)
+&#9;end
+end
+
+function Console.CreateTab(tab)
+&#9;if Console.Tabs[tab] then
+&#9;&#9;return
+&#9;end
+&#9;local b = Console.ButtonDock:AddButton(tab)
+
+&#9;Console.Tabs[tab] = {Instinct.Create(ScrollText),b}
+&#9;Console.Tabs[tab][1].FontSize = &quot;Size18&quot;
+&#9;Console.Tabs[tab][1].TextColor = Palette:Get(&quot;Console&quot;, &quot;Text&quot;)
+&#9;Console.Tabs[tab][1]:Create(Console.TerminalWindow)
+&#9;Console.Tabs[tab][1]:Push(&quot; --- &quot;..tab..&quot; ---&quot;, Palette:Get(&quot;ColorLabel&quot;, &quot;white&quot;))
+&#9;Console.Tabs[tab][1].Root.Visible = false
 &#9;
-end
-
-
-
-function Event:connect(func)
-&#9;if not self.ConnectionList then
-&#9;&#9;self.ConnectList = {}
-&#9;end
-&#9;table.insert(self.ConnectionList, func)
-&#9;local conn = {}
-&#9;setmetatable(conn, {__index = Connection})
-&#9;conn.Root = self
-&#9;conn.func = func
-end
-
-function Event:fire(...)
-&#9;if self.ConnectionList then 
-&#9;&#9;for i,v in pairs(self.ConnectionList) do 
-&#9;&#9;&#9;local args = {...}
-&#9;&#9;&#9;delay(0, function() 
-&#9;&#9;&#9;&#9;v(unpack(args))
-&#9;&#9;&#9;end)
+&#9;b.MouseButton1Click:connect(function()
+&#9;&#9;if Console.TabOpen then
+&#9;&#9;&#9;Console.Tabs[Console.TabOpen][1].Root.Visible = false
+&#9;&#9;&#9;Console.Tabs[Console.TabOpen][2].BackgroundColor3 = Palette:Get(&quot;Complement&quot;)
 &#9;&#9;end
-&#9;end
+&#9;&#9;Console.TabOpen = tab
+&#9;&#9;Console.Tabs[tab][1].Root.Visible = true
+&#9;&#9;b.BackgroundColor3 = Palette:Get(&quot;Shade1&quot;)
+&#9;end)
+&#9;
+&#9;return Console.Tabs[tab][1]
 end
 
-return Event</ProtectedString>
+return Console</ProtectedString>
 			</Properties>
 		</Item>
-		<Item class="Model" referent="RBX21">
+		<Item class="Model" referent="RBX24">
 			<Properties>
 				<CoordinateFrame name="ModelInPrimary">
 					<X>0</X>
@@ -1227,7 +1638,7 @@ return Event</ProtectedString>
 				<string name="Name">LocaleFiles</string>
 				<Ref name="PrimaryPart">null</Ref>
 			</Properties>
-			<Item class="Script" referent="RBX22">
+			<Item class="Script" referent="RBX25">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
@@ -1242,7 +1653,7 @@ return Locale
 </ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Script" referent="RBX23">
+			<Item class="Script" referent="RBX26">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
@@ -1257,7 +1668,7 @@ return Locale
 </ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Script" referent="RBX24">
+			<Item class="Script" referent="RBX27">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
@@ -1278,7 +1689,7 @@ return Locale
 </ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Script" referent="RBX25">
+			<Item class="Script" referent="RBX28">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
@@ -1293,7 +1704,7 @@ return Locale
 </ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Script" referent="RBX26">
+			<Item class="Script" referent="RBX29">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
@@ -1308,7 +1719,7 @@ return Locale
 </ProtectedString>
 				</Properties>
 			</Item>
-			<Item class="Script" referent="RBX27">
+			<Item class="Script" referent="RBX30">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
@@ -1330,7 +1741,7 @@ return Locale
 				</Properties>
 			</Item>
 		</Item>
-		<Item class="Script" referent="RBX28">
+		<Item class="Script" referent="RBX31">
 			<Properties>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
@@ -1373,6 +1784,94 @@ function Event:wait()
 end
 
 return Event</ProtectedString>
+			</Properties>
+		</Item>
+		<Item class="Script" referent="RBX32">
+			<Properties>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">Content</string>
+				<ProtectedString name="Source">local Content = {}
+
+function Content:WaitForContent()
+&#9;Instinct.Console.CreateTab &quot;Core&quot;
+&#9;local last = game:GetService(&quot;ContentProvider&quot;).RequestQueueSize
+&#9;while game:GetService(&quot;ContentProvider&quot;).RequestQueueSize &gt; 0 do
+&#9;&#9;wait()
+&#9;&#9;if game:GetService(&quot;ContentProvider&quot;).RequestQueueSize ~= last then
+&#9;&#9;&#9;last = game:GetService(&quot;ContentProvider&quot;).RequestQueueSize
+&#9;&#9;&#9;Instinct.Console.Write(&quot;Core&quot;, &quot;ContentProvider: Queue: &quot;..game:GetService(&quot;ContentProvider&quot;).RequestQueueSize)
+&#9;&#9;end
+&#9;end
+end
+
+return Content</ProtectedString>
+			</Properties>
+		</Item>
+		<Item class="Script" referent="RBX33">
+			<Properties>
+				<bool name="Disabled">false</bool>
+				<Content name="LinkedSource"><null></null></Content>
+				<string name="Name">MainMenu</string>
+				<ProtectedString name="Source">-- MainMenu provides the main menu for the game
+-- Additional modules can be launched from here
+-- Insertion points are provided
+
+local MainMenu = {}
+
+MainMenu.TitleFont = &quot;ArialBold&quot;
+MainMenu.FontSize = &quot;Size36&quot;
+MainMenu.TitleShade = 7
+
+MainMenu.TextWhiteSpace = 10
+
+MainMenu.ButtonFont = &quot;ArialBold&quot;
+MainMenu.ButtonFontSize = &quot;Size24&quot;
+
+MainMenu.WhiteSpace = 20
+MainMenu.ButtonShading = 5 -- wow so much shading
+MainMenu.XOffset = 50
+
+local Palette = Instinct.Include &quot;Utilities/Palette&quot;
+local Locale = Instinct.Include &quot;Services/Locale&quot;
+local Presets = Instinct.Include &quot;Gui/GuiPresets&quot;
+local Dim = Instinct.Include &quot;Gui/DimTools&quot;
+
+local Player = game.Players.LocalPlayer
+
+function MainMenu.CreateFromList(title, list) -- creates the main menu from gui items
+&#9;local VERSION = Instinct.Include &quot;Version&quot;
+&#9;local Root = Instance.new(&quot;ScreenGui&quot;, Player.PlayerGui)
+&#9;local Backdrop = Presets.Backdrop(5)
+&#9;local MMLabel, x, y = Presets.CustomButton(
+&#9;&#9;title,&#9;&#9;MainMenu.TitleShade, MainMenu.TitleFont, MainMenu.FontSize, 
+&#9;&#9;Palette:Get(&quot;Text&quot;), Palette:Get(&quot;Complement&quot;, &quot;Shade3&quot;), 
+&#9;&#9;MainMenu.TextWhiteSpace) 
+&#9;local curry = MainMenu.WhiteSpace
+&#9;Backdrop.Parent = Root
+&#9;MMLabel.Parent = Backdrop
+&#9;local curry = curry + y + MainMenu.WhiteSpace
+&#9;MMLabel.Position = UDim2.new(0.5, -x/2, 0, MainMenu.WhiteSpace)
+&#9;local max_x = x
+&#9;for i,v in pairs(list) do
+&#9;&#9;local b,x,y = Presets.CustomButton(v, MainMenu.ButtonShading, MainMenu.ButtonFont, 
+&#9;&#9;&#9;MainMenu.ButtonFontSize, Palette:Get(&quot;Text&quot;), Palette:Get(&quot;Complement&quot;), 
+&#9;&#9;&#9;MainMenu.TextWhiteSpace
+&#9;&#9;)
+&#9;&#9;b.Parent = Backdrop
+&#9;&#9;b.Position = UDim2.new(0.5, -x/2, 0, curry)
+&#9;&#9;curry = curry + y + MainMenu.WhiteSpace
+&#9;&#9;if x &gt; max_x then
+&#9;&#9;&#9;x = max_x
+&#9;&#9;end
+&#9;end
+&#9;
+&#9;Backdrop.Size = UDim2.new(0, max_x + MainMenu.WhiteSpace, 0, curry)
+&#9;Backdrop.Position = UDim2.new(1,-(max_x + MainMenu.WhiteSpace) - MainMenu.XOffset, 0.5, -curry/2)
+end
+
+
+return MainMenu</ProtectedString>
 			</Properties>
 		</Item>
 	</Item>

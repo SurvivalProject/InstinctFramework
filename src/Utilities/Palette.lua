@@ -3,7 +3,7 @@ local Palette = {}
 
 
 local ct = Instinct.Include("Utilities/ColorTools")
-print(ct)
+
 local rgb = ct.RGBToColor3
 
 
@@ -36,6 +36,10 @@ Palette.Data = {
 		Shade3 = rgb(119, 25, 25),
 		Shade4 = rgb( 78,  3,  3),
 	},
+	Console = {
+		Default = rgb(0,0,0),
+		Text = rgb(255,255,255),
+	},
 	Text = {
 		Default = rgb(0,0,0),
 		White = rgb(255,255,255)
@@ -49,7 +53,34 @@ Palette.Data = {
 	},
 	SFX = {
 		Default = rgb(0,0,0), -- shade color
+	},
+	ColorLabel = { -- colorlabel tags!
+		black = rgb(0,0,0),
+		red = rgb(128,0,0),
+		green = rgb(0,128,0),
+		yellow = rgb(128,128,0),
+		blue = rgb(0,0,128),
+		purple = rgb(128,0,128),
+		cyan = rgb(0,128,128),
+		white = rgb(192,192,192)
+		
+		
+	},
+	ColorLabelLight = {
+		black = rgb(128,128,128),
+		red = rgb(255,0,0),
+		green = rgb(0,255,0),
+		yellow = rgb(255,255,0),
+		blue = rgb(0,0,255),
+		purple = rgb(255,0,255),
+		cyan = rgb(0,255,255),
+		white = rgb(255,255,255)		
+		
 	}
+	
+	
+	--[[ 0 #000000  1 #800000  2 #008000  3 #808000  4 #000080  5 #800080  6 #008080  7 #c0c0c0
+ 8 #808080  9 #ff0000 10 #00ff00 11 #ffff00 12 #0000ff 13 #ff00ff 14 #00ffff 15 #ffffff--]]
 }
 
 function Palette:Get(Type, Which)
@@ -60,6 +91,10 @@ function Palette:Get(Type, Which)
 	else 
 		return self.Data.Default[Which] or self.Data.Default.Default
 	end
+end
+
+function Palette:GetRaw(Type, Which) -- can return nil! raw checks
+	return self.Data[Type] and self.Data[Type][Which]
 end
 
 return Palette

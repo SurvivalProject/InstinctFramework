@@ -24,7 +24,6 @@ function WindowServer.RequestOpen(WindowName, Button)
 	for i,v in pairs(WindowServer.Windows) do
 		if i ~= WindowName then
 			v:Close()
-			print("CLOSING")
 		end
 	end
 	return new

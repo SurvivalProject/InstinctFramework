@@ -75,7 +75,6 @@ end
 function Window:Open()
 	self.Canvas.Visible = true
 	self.State = "Open"
-	print('xwn open')
 	if self.Button then
 		self.Button.BackgroundColor3 = Palette:Get("Shade1")
 	end

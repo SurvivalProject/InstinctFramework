@@ -19,11 +19,13 @@ function DimTools.TextSize(text, font, fontsize)
 	my.FontSize = fontsize
 	my.Text = text
 	my.Font = font
-	if my.TextBounds.X == 0 or my.TextBounds.Y == 0 then
+	if my.TextBounds.X <= 0.99 or my.TextBounds.Y <= 0.99 then
 		repeat wait(1/60) 
-		until my.TextBounds.X ~= 0 and my.TextBounds.Y ~= 0
+		until my.TextBounds.X >0.99 and my.TextBounds.Y >0.99
 	end
-	return my.TextBounds.X, my.TextBounds.Y
+	local x = my.TextBounds.X
+	local y = my.TextBounds.Y
+	return x, y
 end
 
 return DimTools

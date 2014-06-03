@@ -19,11 +19,9 @@ function DropDown:Create(Parent, Position, BackgroundC3, BorderC3, BorderSize)
 		for i,v in pairs(need) do 
 			if BorderSize[v] == nil then 
 				wrong = true
-				print(v)
 				break
 			end
 		end
-		print(wrong, BorderSize.which)
 		if not wrong then
 			SFX.MakeBorder(new, BorderSize.left, BorderSize.right, BorderSize.up, BorderSize.down, BorderC3, BorderSize.bordersize)
 		end
@@ -47,7 +45,6 @@ function DropDown:AddButton(text)
 	new.Text = text
 	new.FontSize = "Size12"
 	local xt, yt = Dim.TextSize(text, "ArialBold", "Size12")
-	print(xt, "hi")
 	new.Size = UDim2.new(0, xt + self.TextOffset * 2, 0, new.Size.Y.Offset)
 	new.Position = UDim2.new(0, self.XOffset, 0, ypos)
 	new.Parent = self.Root
@@ -66,7 +63,6 @@ function DropDown:AddButton(text)
 		end
 	end
 	local ysize = ypos + new.Size.Y.Offset + self.Shade + self.YOffset
-	print(ysize)
 	self.Root.Size = UDim2.new(0,max_x, 0, ysize)
 	
 	return new
