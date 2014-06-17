@@ -11,6 +11,7 @@ Console.Seperator = " :: "
 Console.Ready = false
 
 function Console.Initialize()
+	print(Console.Ready)
 	if Console.Ready then
 		return
 	end

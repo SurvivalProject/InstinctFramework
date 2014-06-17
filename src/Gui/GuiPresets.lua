@@ -36,6 +36,7 @@ function GuiPresets.CustomButton(ButtonText, ButtonShade, ButtonFont, ButtonFont
 	new.FontSize = ButtonFontSize
 	new.TextColor3 = TextColor
 	new.BackgroundColor3 = BackgroundColor
+	new.BorderSizePixel = 0
 	if ButtonShade > 0 then
 		SFX.Shade(new, ButtonShade)
 	end
@@ -58,7 +59,7 @@ function GuiPresets.Backdrop(bsize)
 	bar.Size=UDim2.new(0,0,0,0)
 	bar.BorderSizePixel = bsize
 	bar.BorderColor3 = Palette:Get("Default", "Shade4")
-	bar.BackgroundColor3 = Palette:Get("Default", "Shade2")	
+	bar.BackgroundColor3 = Palette:Get("Default", "Shade1")	
 	return bar
 end
 

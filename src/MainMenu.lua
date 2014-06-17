@@ -6,7 +6,12 @@ local MainMenu = {}
 
 MainMenu.TitleFont = "ArialBold"
 MainMenu.FontSize = "Size36"
-MainMenu.TitleShade = 7
+MainMenu.TitleShade = 3
+
+MainMenu.BarSize = 4
+MainMenu.BarOffset = 3
+MainMenu.BarColor = Palette:Get() 
+MainMenu.BarScale = 0.8 -- 80% of the original size
 
 MainMenu.TextWhiteSpace = 10
 
@@ -14,7 +19,7 @@ MainMenu.ButtonFont = "ArialBold"
 MainMenu.ButtonFontSize = "Size24"
 
 MainMenu.WhiteSpace = 20
-MainMenu.ButtonShading = 5 -- wow so much shading
+MainMenu.ButtonShading = 2 -- wow so much shading
 MainMenu.XOffset = 50
 
 local Palette = Instinct.Include "Utilities/Palette"
@@ -30,7 +35,7 @@ function MainMenu.CreateFromList(title, list) -- creates the main menu from gui 
 	local Backdrop = Presets.Backdrop(5)
 	local MMLabel, x, y = Presets.CustomButton(
 		title,		MainMenu.TitleShade, MainMenu.TitleFont, MainMenu.FontSize, 
-		Palette:Get("Text"), Palette:Get("Complement", "Shade3"), 
+		Palette:Get("Text"), Palette:Get("Complement"), 
 		MainMenu.TextWhiteSpace) 
 	local curry = MainMenu.WhiteSpace
 	Backdrop.Parent = Root
@@ -39,8 +44,11 @@ function MainMenu.CreateFromList(title, list) -- creates the main menu from gui 
 	MMLabel.Position = UDim2.new(0.5, -x/2, 0, MainMenu.WhiteSpace)
 	local max_x = x
 	for i,v in pairs(list) do
+		local DeltaY = -( MainMenu.TextWhiteSpace - MainMenu.BarOffset )
+		local inspos = curry + DeltaY 
+		local new = Instance.new("Frame", BackDrop)
 		local b,x,y = Presets.CustomButton(v, MainMenu.ButtonShading, MainMenu.ButtonFont, 
-			MainMenu.ButtonFontSize, Palette:Get("Text"), Palette:Get("Complement"), 
+			MainMenu.ButtonFontSize, Palette:Get("Text"), Palette:Get("Complement", "Shade2"), 
 			MainMenu.TextWhiteSpace
 		)
 		b.Parent = Backdrop

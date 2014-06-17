@@ -558,9 +558,7 @@ function Date.UnixToDate(time)
 &#9;from2000 = from2000 - yearsleft * Date.Constants.year
 &#9;
 &#9;
-end
-
-return Date</ProtectedString>
+end</ProtectedString>
 				</Properties>
 			</Item>
 		</Item>
@@ -569,7 +567,7 @@ return Date</ProtectedString>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Version</string>
-				<ProtectedString name="Source">return &quot;0.0.275&quot;</ProtectedString>
+				<ProtectedString name="Source">return &quot;0.0.268&quot;</ProtectedString>
 			</Properties>
 		</Item>
 		<Item class="Model" referent="RBX11">
@@ -1026,7 +1024,6 @@ function GuiPresets.CustomButton(ButtonText, ButtonShade, ButtonFont, ButtonFont
 &#9;new.FontSize = ButtonFontSize
 &#9;new.TextColor3 = TextColor
 &#9;new.BackgroundColor3 = BackgroundColor
-&#9;new.BorderSizePixel = 0
 &#9;if ButtonShade &gt; 0 then
 &#9;&#9;SFX.Shade(new, ButtonShade)
 &#9;end
@@ -1049,7 +1046,7 @@ function GuiPresets.Backdrop(bsize)
 &#9;bar.Size=UDim2.new(0,0,0,0)
 &#9;bar.BorderSizePixel = bsize
 &#9;bar.BorderColor3 = Palette:Get(&quot;Default&quot;, &quot;Shade4&quot;)
-&#9;bar.BackgroundColor3 = Palette:Get(&quot;Default&quot;, &quot;Shade1&quot;)&#9;
+&#9;bar.BackgroundColor3 = Palette:Get(&quot;Default&quot;, &quot;Shade2&quot;)&#9;
 &#9;return bar
 end
 
@@ -1522,7 +1519,6 @@ Console.Seperator = &quot; :: &quot;
 Console.Ready = false
 
 function Console.Initialize()
-&#9;print(Console.Ready)
 &#9;if Console.Ready then
 &#9;&#9;return
 &#9;end
@@ -1825,12 +1821,7 @@ local MainMenu = {}
 
 MainMenu.TitleFont = &quot;ArialBold&quot;
 MainMenu.FontSize = &quot;Size36&quot;
-MainMenu.TitleShade = 3
-
-MainMenu.BarSize = 4
-MainMenu.BarOffset = 3
-MainMenu.BarColor = Palette:Get() 
-MainMenu.BarScale = 0.8 -- 80% of the original size
+MainMenu.TitleShade = 7
 
 MainMenu.TextWhiteSpace = 10
 
@@ -1838,7 +1829,7 @@ MainMenu.ButtonFont = &quot;ArialBold&quot;
 MainMenu.ButtonFontSize = &quot;Size24&quot;
 
 MainMenu.WhiteSpace = 20
-MainMenu.ButtonShading = 2 -- wow so much shading
+MainMenu.ButtonShading = 5 -- wow so much shading
 MainMenu.XOffset = 50
 
 local Palette = Instinct.Include &quot;Utilities/Palette&quot;
@@ -1854,7 +1845,7 @@ function MainMenu.CreateFromList(title, list) -- creates the main menu from gui 
 &#9;local Backdrop = Presets.Backdrop(5)
 &#9;local MMLabel, x, y = Presets.CustomButton(
 &#9;&#9;title,&#9;&#9;MainMenu.TitleShade, MainMenu.TitleFont, MainMenu.FontSize, 
-&#9;&#9;Palette:Get(&quot;Text&quot;), Palette:Get(&quot;Complement&quot;), 
+&#9;&#9;Palette:Get(&quot;Text&quot;), Palette:Get(&quot;Complement&quot;, &quot;Shade3&quot;), 
 &#9;&#9;MainMenu.TextWhiteSpace) 
 &#9;local curry = MainMenu.WhiteSpace
 &#9;Backdrop.Parent = Root
@@ -1863,11 +1854,8 @@ function MainMenu.CreateFromList(title, list) -- creates the main menu from gui 
 &#9;MMLabel.Position = UDim2.new(0.5, -x/2, 0, MainMenu.WhiteSpace)
 &#9;local max_x = x
 &#9;for i,v in pairs(list) do
-&#9;&#9;local DeltaY = -( MainMenu.TextWhiteSpace - MainMenu.BarOffset )
-&#9;&#9;local inspos = curry + DeltaY 
-&#9;&#9;local new = Instance.new(&quot;Frame&quot;, BackDrop)
 &#9;&#9;local b,x,y = Presets.CustomButton(v, MainMenu.ButtonShading, MainMenu.ButtonFont, 
-&#9;&#9;&#9;MainMenu.ButtonFontSize, Palette:Get(&quot;Text&quot;), Palette:Get(&quot;Complement&quot;, &quot;Shade2&quot;), 
+&#9;&#9;&#9;MainMenu.ButtonFontSize, Palette:Get(&quot;Text&quot;), Palette:Get(&quot;Complement&quot;), 
 &#9;&#9;&#9;MainMenu.TextWhiteSpace
 &#9;&#9;)
 &#9;&#9;b.Parent = Backdrop
