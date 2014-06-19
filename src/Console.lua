@@ -40,11 +40,15 @@ function Console.Initialize()
 end
 
 function Console.Open()
-	Console.CRoot.Visible = true
+	for i,v in pairs(Console.CRoot:GetChildren()) do
+		v.Visible = true
+	end 
 end
 
 function Console.Close()
-	Console.CRoot.Visible = false
+	for i,v in pairs(Console.CRoot:GetChildren()) do
+		v.Visible = false
+	end 
 end
 
 function Console.Write(tab, prio, ...)

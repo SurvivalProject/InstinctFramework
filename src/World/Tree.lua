@@ -17,19 +17,20 @@ Tree.Trunk.TopSurface = "Smooth"
 Tree.Trunk.BottomSurface = "Smooth"
 Tree.Trunk.FormFactor = "Custom"
 Tree.Trunk.Name = "Trunk"
+--Instance.new("BlockMesh", Tree.Trunk)
 
-Tree.TrunkFormMin = Vector3.new(0.25,1,0.25)
+Tree.TrunkFormMin = Vector3.new(0.15,1,0.15)
 Tree.TrunkFormMax = Vector3.new(0.25,1,0.25)
 
-Tree.FoliageFormMin = Vector3.new(3,1,3)
+Tree.FoliageFormMin = Vector3.new(2.5,1,2.5)
 Tree.FoliageFormMax = Vector3.new(4,1,4)
 
 Tree.SaplingHeight = 1 -- oh so cute
 Tree.MinHeight = 18
-Tree.MaxHeight = 22
+Tree.MaxHeight = 32
 
-Tree.GrowTimeMin = 10
-Tree.GrowTimeMax = 30
+Tree.GrowTimeMin = 30
+Tree.GrowTimeMax = 60
 
 -- TrunkForm and FoliageForm are set on init
 
@@ -39,6 +40,19 @@ Tree.TopFoliagePortion = 0.5 -- This is relative to the MIDDLE
 
 Tree.Foliage = Instance.new("Part")
 Tree.Foliage.BrickColor = BrickColor.new "Bright green"
+
+Tree.AvailableFoliageColors = {
+	BrickColor.new "Bright green",
+	BrickColor.new "Earth green",
+	BrickColor.new "Medium green",
+	BrickColor.new "Grime"
+}
+
+Tree.AvailableTrunkColors = {
+	BrickColor.new "Brown",
+	BrickColor.new "Reddish brown"
+}
+
 Tree.Foliage.Material = "Grass"
 Tree.Foliage.TopSurface = "Smooth"
 Tree.Foliage.BottomSurface = "Smooth"
@@ -260,8 +274,16 @@ function Tree:Initialize(Position, Ground)
 		self.Ground = Ground		
 		self.GroundPos = Position
 		
+		-- Colors;
+		local ft, tt = self.AvailableFoliageColors, self.AvailableTrunkColors
+		local fc, tc = ft[math.random(1, #ft)], tt[math.random(1,#tt)]
+		
+		self.Foliage.BrickColor = fc 
+		self.Trunk.BrickColor = tc
+		
 		-- Generate the look of the tree!
 		self.FoliageForm = self:GetRandomVector(self.FoliageFormMin, self.FoliageFormMax)
+		self.FoliageForm = Vector3.new(self.FoliageForm.x, self.FoliageForm.y, self.FoliageForm.x)
 		self.TrunkForm = self:GetRandomVector(self.TrunkFormMin, self.TrunkFormMax)
 		self.WantedHeight = self.MinHeight + math.random() * (self.MaxHeight - self.MinHeight)
 		

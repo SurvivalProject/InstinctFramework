@@ -32,4 +32,4 @@ end
 
 Options.New("ConsolePriority", {"Low", "Normal", "High", "Extreme"})
 
-return true
+return Options
