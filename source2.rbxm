@@ -569,7 +569,7 @@ return Date</ProtectedString>
 				<bool name="Disabled">false</bool>
 				<Content name="LinkedSource"><null></null></Content>
 				<string name="Name">Version</string>
-				<ProtectedString name="Source">return &quot;0.0.444&quot;</ProtectedString>
+				<ProtectedString name="Source">return &quot;0.0.275&quot;</ProtectedString>
 			</Properties>
 		</Item>
 		<Item class="Model" referent="RBX11">
@@ -1821,11 +1821,6 @@ return Content</ProtectedString>
 -- Additional modules can be launched from here
 -- Insertion points are provided
 
-local Palette = Instinct.Include &quot;Utilities/Palette&quot;
-local Locale = Instinct.Include &quot;Services/Locale&quot;
-local Presets = Instinct.Include &quot;Gui/GuiPresets&quot;
-local Dim = Instinct.Include &quot;Gui/DimTools&quot;
-
 local MainMenu = {}
 
 MainMenu.TitleFont = &quot;ArialBold&quot;
@@ -1845,6 +1840,11 @@ MainMenu.ButtonFontSize = &quot;Size24&quot;
 MainMenu.WhiteSpace = 20
 MainMenu.ButtonShading = 2 -- wow so much shading
 MainMenu.XOffset = 50
+
+local Palette = Instinct.Include &quot;Utilities/Palette&quot;
+local Locale = Instinct.Include &quot;Services/Locale&quot;
+local Presets = Instinct.Include &quot;Gui/GuiPresets&quot;
+local Dim = Instinct.Include &quot;Gui/DimTools&quot;
 
 local Player = game.Players.LocalPlayer
 
@@ -1909,54 +1909,266 @@ return MainMenu</ProtectedString>
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
-					<string name="Name">Tree2</string>
-					<ProtectedString name="Source"></ProtectedString>
+					<string name="Name">Tree</string>
+					<ProtectedString name="Source">-- Tree is used in Stranded to generate trees
+-- Please note that this version is limited.
+
+local Fruit = Instinct.Include &quot;World/Fruit&quot;
+
+local Tree = {}
+
+-- How much branches must the tree have?
+-- Note: no depth!
+
+Tree.MinBranches = 2
+Tree.MaxBranches = 4
+
+-- The y component of these must be 1
+-- You can always do this as this is just some ratio.
+
+Tree.FoliageSize = Vector3.new(0.25,1,0.25)
+Tree.FoliageSizeMax = Vector3.new(0.35, 1, 0.35)
+
+Tree.BaseSize = Vector3.new(0.3, 1, 0.3)
+Tree.BaseSizeMax = Vector3.new(0.4, 1, 0.4)
+Tree.StartHeight = 1
+
+Tree.FoliagePortion = 0.5
+
+Tree.MinHeight = 8
+Tree.MaxHeight = 10
+
+Tree.GrowTime = 600 -- 10 minutes
+
+Tree.BranchSizeShiftMin = 0.6
+Tree.BranchSizeShiftMax = 0.9
+
+Tree.BranchGrowRate = 0.75
+
+Tree.MinimumCenterRotation = 30 -- Degrees minimum rotation.
+
+Tree.BendMin = 20
+Tree.BendMax = 40
+
+-- Colors
+
+Tree.TrunkColor = BrickColor.new(&quot;Brown&quot;)
+Tree.FoliageColor = BrickColor.new()
+
+Tree.Fruit = nil
+
+function Tree:UpdateWeld(part1, part2, c1, c2)
+&#9;if part1:FindFirstChild(&quot;Weld&quot;) then
+&#9;&#9;part1.Weld:Destroy()
+&#9;end
+&#9;local Weld = Instance.new(&quot;Weld&quot;, part1)
+&#9;Weld.Name = &quot;Weld&quot;
+&#9;Weld.Part0 = part2
+&#9;Weld.Part1 = part1
+&#9;Weld.C0 = c2:toObjectSpace(c1)
+end
+
+function Tree:GetRandomVector(min,max)
+&#9;local xmin,ymin,zmin = min.x, min.y, min.z
+&#9;local xmax,ymax,zmax = max.x, max.y, max.z
+&#9;local function calc(min,max)
+&#9;&#9;return min + math.random() * (max-min)
+&#9;end
+&#9;local x = calc(xmin, xmax)
+&#9;local y = calc(ymin,ymax)
+&#9;local z = calc(zmin,zmax)
+&#9;return Vector3.new(x,y,z)
+end
+
+-- Initializes the tree;
+-- Generates a base
+-- DOES NOT USE CONSTRUCTOR SO USER CAN DEFINE ITS OWN PROPERTIES OF THE TREE!
+function Tree:Initialize()
+&#9;self.StartTime = tick()&#9;
+&#9;
+&#9;local base = Instance.new &quot;Part&quot;
+&#9;base.TopSurface = &quot;Smooth&quot;
+&#9;base.BottomSurface = &quot;Smooth&quot;
+&#9;base.BrickColor = self.TrunkColor
+&#9;base.FormFactor = &quot;Custom&quot;
+
+&#9;
+&#9;Instance.new(&quot;CylinderMesh&quot;, base)
+&#9;self.Base = base
+&#9;
+&#9;
+&#9;local foliage = Instance.new &quot;Part&quot;
+&#9;foliage.BrickColor = self.FoliageColor
+&#9;foliage.BottomSurface = &quot;Smooth&quot;
+&#9;foliage.TopSurface = &quot;Smooth&quot;
+&#9;foliage.FormFactor = &quot;Custom&quot;
+&#9;self.Foliage = foliage
+&#9;
+&#9;local bs = self:GetRandomVector(self.BaseSize, self.BaseSizeMax)
+&#9;local fs = self:GetRandomVector(self.FoliageSize, self.FoliageSizeMax)
+&#9;
+&#9;base.Size = bs
+&#9;foliage.Size = fs
+&#9;
+&#9;self.BaseSize = bs
+&#9;self.FoliageSize = bs
+&#9;
+&#9;self.TargetHeight = self.MinHeight + math.random() * (self.MaxHeight - self.MinHeight)
+end
+
+-- Returns a vector which has y = 1, ratios are ok
+-- Sorta unit vector.
+-- Can be used to restore tree memory.
+-- Or to generate branches :)
+function Tree:GetVectorRatio(vector)
+&#9;local y = vector.y&#9;
+&#9;return vector/y
+end
+
+function Tree:GetRotationArray(NBranches) -- Input Number of branches you want to spawn, get Y rotation array.
+&#9;local NBranches = NBranches or self.Branches&#9;
+&#9;--local random_offset = math.random(1,360)  --Creates a random offset.
+&#9;local plus_minimum = self.MinimumCenterRotation
+&#9;local plus_maximum = (360/NBranches) - self.MinimumCenterRotation
+&#9;local list_out = {} 
+&#9;for angle = 1, NBranches do
+&#9;&#9;list_out[angle] = math.rad( math.random(plus_minimum, plus_maximum) + (360/NBranches) * (angle - 1) )
+&#9;end
+&#9;return list_out
+end
+
+function Tree:CreateFoliage(branch)
+&#9;local y = branch.Size.y
+&#9;local myheight = y * self.FoliagePortion
+&#9;local size = self.FoliageSize * myheight
+&#9;local new = self.Foliage:Clone()
+&#9;new.Parent = branch
+&#9;new.Size = size
+&#9;new.CFrame = branch.CFrame * CFrame.new(0, branch.Size.y/2, 0)
+end
+
+function Tree:CreateBranch(Rotation)
+&#9;&#9;local base = self.Base
+&#9;&#9;local new = base:Clone()
+&#9;&#9;table.insert(newBranches, new)
+&#9;&#9;local ds = self.BranchSizeShiftMax - self.BranchSizeShiftMin
+&#9;&#9;local RandSize = self.BranchSizeShiftMin + ds * math.random()
+&#9;&#9;
+&#9;&#9;local newx = base.Size.x * RandSize&#9;&#9;
+&#9;&#9;
+&#9;&#9;local NewSize = Vector3.new(newx,base.Size.y,newx) * self.BranchGrowRate
+&#9;&#9;
+&#9;&#9;local CF = BaseTop * CFrame.new(0, base.Size.y/2, 0)
+&#9;&#9;
+&#9;&#9;local rotate = self.BendMin + math.random() * (self.BendMax-self.BendMin)
+&#9;&#9;
+&#9;&#9;CF = CF * CFrame.Angles(0,math.rad(Rotation), math.rad(rotate)) * CFrame.new(0,NewSize.y,0) 
+&#9;&#9;new.Parent = self.TreeBase 
+&#9;&#9;
+&#9;&#9;self:UpdateWeld(base, new, base.CFrame, new.CFrame)
+&#9;&#9;return new
+end
+
+function Tree:Place(Ground, CF)
+&#9;local base = self.Base:Clone()
+&#9;self.TreeBase = base
+&#9;base.Parent = game.Workspace.Life
+&#9;local h = self.StartHeight * self.BaseSize
+&#9;base.Size = h 
+&#9;base.CFrame = CF * CFrame.new(0, base.Size.y/2, 0) 
+&#9;self:UpdateWeld(Ground, base, Ground.CFrame, base.CFrame)
+&#9;self.Branches = math.random(self.MinBranches, self.MaxBranches)
+&#9;local Rotations = self:GetRotationArray()
+&#9;self.Rotations = Rotations
+&#9;local BaseTop = base.CFrame * CFrame.new(0, base.Size.y/2,0)
+&#9;local newBranches = {}
+&#9;for branch = 1, self.Branches do 
+&#9;&#9;local new = self:CreateBranch(Rotations[branch])
+&#9;&#9;table.insert(newBranches, new)
+&#9;&#9;Rotations[branch] = {Rotation, new, self.StartTime}
+&#9;end
+&#9;for _, branch in pairs(newBranches) do 
+&#9;&#9;branch.Parent = base
+&#9;&#9;self:CreateFoliage(branch)
+&#9;end
+end
+
+function Tree:GetNewHeightPortion(StartTime)
+&#9;local dt = tick() - (StartTime or self.StartTime)
+&#9;if dt &gt; self.GrowTime then
+&#9;&#9;return 1
+&#9;end
+&#9;local func = function(x)
+&#9;&#9;return (-1 * (((x/self.GrowTime)-1)^2) + 1) 
+&#9;end
+&#9;return func(dt)
+end
+
+function Tree:CreateFoliage(branch)
+&#9;local y = branch.Size.y
+&#9;local foliage_y = self.FoliagePortion * y 
+&#9;local foliagesize = foliage_y * self.FoliageSize
+&#9;local foliage = self.Foliage:Clone()
+&#9;foliage.Parent = branch
+&#9;local btop = branch.CFrame * CFrame.new(0, branch.Size.y/2, 0)
+&#9;foliage.Size = foliagesize
+&#9;self:UpdateWeld(branch, foliage, branch.CFrame, btop)&#9;
+end
+
+function Tree:UpdateFoliage(branch, foliage)
+&#9;local y = branch.Size.y
+&#9;local foliage_y = self.FoliagePortion * y 
+&#9;local foliagesize = foliage_y * self.FoliageSize
+&#9;foliage.Parent = branch
+&#9;local btop = branch.CFrame * CFrame.new(0, branch.Size.y/2, 0)
+&#9;foliage.Size = foliagesize
+&#9;self:UpdateWeld(branch, foliage, branch.CFrame, btop)&#9;
+end
+
+function Tree:Grow()
+&#9;-- First update the base.
+&#9;local newheight = self:GetNewHeightPortion()
+&#9;if not self.BaseFinishedGrowing then 
+&#9;&#9;local height = newheight * self.TargetHeight
+&#9;&#9;if newheight == 1 then
+&#9;&#9;&#9;self.BaseFinishedGrowing = true
+&#9;&#9;end
+&#9;end
+&#9;for i,v in pairs(self.Rotations) do
+&#9;&#9;if v[2].Parent ~= self.TreeBase then
+&#9;&#9;&#9;local new = self:CreateBranch(v[1])
+&#9;&#9;&#9;v[2] = new
+&#9;&#9;&#9;v[3] = tick()
+&#9;&#9;end
+&#9;&#9;if v[2].Size.y &lt; self.BranchGrowRate * self.TargetHeight then 
+&#9;&#9;&#9;local ratio = self:GetVectorRation(v[2].Size)
+&#9;&#9;&#9;local th = self.BranchGrowRate * self.TargetHeight
+&#9;&#9;&#9;local portion = self:GetNewHeightPortion(v[3])
+&#9;&#9;&#9;local newheight = th * portion
+&#9;&#9;&#9;local newsize = ratio * newheight
+&#9;&#9;&#9;local dy = newsize.y - v[2].Size.y 
+&#9;&#9;&#9;v[2].Size = newsize
+&#9;&#9;&#9;self:UpdateWeld(self.TreeBase, v[2], self.TreeBase.CFrame, v[2].CFrame * CFrame.new(0, dy/2,0))
+&#9;&#9;end
+&#9;&#9;self:UpdateFoliage(v[2])
+&#9;end
+&#9;
+end
+
+return Tree </ProtectedString>
 				</Properties>
 			</Item>
 			<Item class="Script" referent="RBX36">
 				<Properties>
 					<bool name="Disabled">false</bool>
 					<Content name="LinkedSource"><null></null></Content>
-					<string name="Name">Placer</string>
-					<ProtectedString name="Source">-- General placer.
+					<string name="Name">TreePlacement</string>
+					<ProtectedString name="Source">-- Tree placement generator
+-- Maps the world as a line; places trees on this line
 
-local Placer = {}
+local TreePlacement = {}
 
--- root to getchildren;
--- placecheck is called on each child -&gt; true? check density
---&gt; move to new position
---&gt; call placefunc with this position + part
-function Placer:DoJob(root, density_min, density_max, placecheck, placefunc)&#9;
-&#9;local CurrentDensity, NextDensity
-&#9;function newdens()
-&#9;&#9;CurrentDensity = 0
-&#9;&#9;NextDensity= density_min + math.random() * (density_max - density_min)
-&#9;end
-&#9;newdens()
-&#9;for _, child in pairs(root:GetChildren()) do
-
-
-&#9;&#9;if child:IsA(&quot;BasePart&quot;) and placecheck(child) then 
-&#9;&#9;&#9;local z = 0
-&#9;&#9;&#9;
-&#9;&#9;&#9;for x = 1, child.Size.x do 
-&#9;&#9;&#9;&#9;CurrentDensity = CurrentDensity + child.Size.z
-&#9;&#9;&#9;&#9;if CurrentDensity &gt; NextDensity then 
-&#9;&#9;&#9;&#9;&#9;local goback = CurrentDensity - NextDensity
-&#9;&#9;&#9;&#9;&#9;local z = child.Size.z - goback
-&#9;&#9;&#9;&#9;&#9;local start = child.CFrame * CFrame.new(-child.Size.x/2, child.Size.y/2, -child.Size.z/2)
-&#9;&#9;&#9;&#9;&#9;local pos = start * CFrame.new(x,0,z)
-&#9;&#9;&#9;&#9;&#9;placefunc(pos.p, child)
-&#9;&#9;&#9;&#9;&#9;newdens()
-&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;end
-&#9;&#9;&#9;wait()
-&#9;&#9;end
-
-&#9;end
-end
-
-return Placer</ProtectedString>
+return TreePlacement</ProtectedString>
 				</Properties>
 			</Item>
 			<Item class="Script" referent="RBX37">
@@ -1969,20 +2181,6 @@ return Placer</ProtectedString>
 -- collission checking.
 
 local WorldTools = {}
-
-function WorldTools:IsRoom(Pos, Size) -- both vector3 please
-&#9;local BOX = Instance.new(&quot;Part&quot;, game.Workspace)
-&#9;BOX.FormFactor = &quot;Custom&quot;
---&#9;BOX.Transparency = 0
-&#9;BOX.CanCollide = true
-&#9;BOX.Size = Size
-&#9;BOX.Position = Pos
---&#9;wait(1)
-&#9;local bool = (BOX.Position - Pos).magnitude &lt; 0.05
-&#9;print(bool)
-&#9;BOX:Destroy()
-&#9;return bool&#9;
-end
 
 return WorldTools</ProtectedString>
 				</Properties>
@@ -2029,351 +2227,6 @@ end
 
 
 return Fruit</ProtectedString>
-				</Properties>
-			</Item>
-			<Item class="Script" referent="RBX39">
-				<Properties>
-					<bool name="Disabled">false</bool>
-					<Content name="LinkedSource"><null></null></Content>
-					<string name="Name">Tree</string>
-					<ProtectedString name="Source">local Tree = {}
-
--- New trees. Simple, have limitions;
--- No branch spawning! Branch finding should be done via shaking trees.
--- (this action also drops all fruit which *could* be hidden in the tree)
--- Foliage should be CanCollide once dropped
--- Trunk cannot be cut in half directly: first cut completely 
--- This also destroys the tree! 
--- Foliage has the option to regrow - for future season additions!
-
-local WorldTools = Instinct.Include &quot;World/WorldTools&quot;
-
-Tree.Trunk = Instance.new(&quot;Part&quot;)
-Tree.Trunk.BrickColor = BrickColor.new &quot;Brown&quot;
-Tree.Trunk.Material = &quot;Wood&quot;
-Tree.Trunk.TopSurface = &quot;Smooth&quot;
-Tree.Trunk.BottomSurface = &quot;Smooth&quot;
-Tree.Trunk.FormFactor = &quot;Custom&quot;
-Tree.Trunk.Name = &quot;Trunk&quot;
-
-Tree.TrunkFormMin = Vector3.new(0.25,1,0.25)
-Tree.TrunkFormMax = Vector3.new(0.25,1,0.25)
-
-Tree.FoliageFormMin = Vector3.new(3,1,3)
-Tree.FoliageFormMax = Vector3.new(4,1,4)
-
-Tree.SaplingHeight = 1 -- oh so cute
-Tree.MinHeight = 18
-Tree.MaxHeight = 22
-
-Tree.GrowTimeMin = 10
-Tree.GrowTimeMax = 30
-
--- TrunkForm and FoliageForm are set on init
-
-Tree.BottomFoliagePortion = 0.5 -- Thsi is relative to the MIDDLE
-Tree.MiddleFoliagePortion = 0.25  -- This is relative to the TRUNK
-Tree.TopFoliagePortion = 0.5 -- This is relative to the MIDDLE
-
-Tree.Foliage = Instance.new(&quot;Part&quot;)
-Tree.Foliage.BrickColor = BrickColor.new &quot;Bright green&quot;
-Tree.Foliage.Material = &quot;Grass&quot;
-Tree.Foliage.TopSurface = &quot;Smooth&quot;
-Tree.Foliage.BottomSurface = &quot;Smooth&quot;
-Tree.Foliage.FormFactor = &quot;Custom&quot;
-Tree.Foliage.Name = &quot;Foliage&quot;
-
-Tree.Fruit = Instance.new(&quot;Part&quot;)
-Tree.Fruit.BrickColor = BrickColor.Red() 
-Tree.Fruit.TopSurface = &quot;Smooth&quot;
-Tree.Fruit.BottomSurface = &quot;Smooth&quot;
-Tree.Fruit.FormFactor = &quot;Custom&quot;
-Tree.Fruit.Name = &quot;Apple&quot;
-local mesh = Instance.new(&quot;SpecialMesh&quot;, Tree.Fruit)
-mesh.MeshType = &quot;Sphere&quot;
-
-Tree.FruitTargetSize = Vector3.new(1,1,1)
-Tree.MaxFruit = 5
-Tree.MinimalFoliageFruitSize = 10 -- as magnitude
--- fruit welds do not update so fruit will &quot;dissapear&quot; 
-
-Tree.RoomNeeded = Vector3.new(16,22,16)
-
-function Tree:UpdateWeld(part1, part2, c1, c2)
-&#9;if part1:FindFirstChild(&quot;Weld&quot;) then
-&#9;&#9;part1.Weld:Destroy()
-&#9;end
-&#9;local Weld = Instance.new(&quot;Weld&quot;, part1)
-&#9;Weld.Name = &quot;Weld&quot;
-&#9;Weld.Part0 = part2
-&#9;Weld.Part1 = part1
-&#9;Weld.C0 = c2:toObjectSpace(c1)
-end
-
-function Tree:InitializeFoliage()
-&#9;-- Find all foliages which we dont have
-&#9;if not self.MiddleFoliage or self.MiddleFoliage.Parent ~= self.TreeBase then 
-&#9;&#9;local wanted_height = self.SaplingHeight * self.MiddleFoliagePortion
-&#9;&#9;local size = self.FoliageForm * wanted_height
-&#9;&#9;local new = self.Foliage:Clone()
-&#9;&#9;new.Size = size
-&#9;&#9;new.Parent = self.TreeBase
-&#9;&#9;new.CFrame = self.TreeBase.CFrame * CFrame.new(0, self.TreeBase.Size.y/2, 0)
-&#9;&#9;self:UpdateWeld(new, self.TreeBase, new.CFrame, self.TreeBase.CFrame)
-&#9;&#9;self.MiddleFoliage = new
-&#9;&#9;self.MiddleFoliageTime = tick()
-&#9;end
-&#9;if not self.TopFoliage or self.TopFoliage.Parent ~= self.TreeBase then 
-&#9;&#9;local wanted_height =  self.SaplingHeight * self.MiddleFoliagePortion * self.TopFoliagePortion
-&#9;&#9;local size = self.FoliageForm * wanted_height
-&#9;&#9;local new = self.Foliage:Clone()
-&#9;&#9;new.Size = size
-&#9;&#9;new.Parent = self.TreeBase
-&#9;&#9;new.CFrame = self.MiddleFoliage.CFrame * CFrame.new(0, self.MiddleFoliage.Size.y/2, 0) * CFrame.new(0, new.Size.y/2, 0)
-&#9;&#9;self:UpdateWeld(new, self.TreeBase, new.CFrame, self.TreeBase.CFrame)
-&#9;&#9;self.TopFoliage = new
-&#9;&#9;self.TopFoliageTime = tick()
-&#9;end
-&#9;if not self.BottomFoliage or self.BottomFoliage.Parent ~= self.TreeBase then 
-&#9;&#9;local wanted_height =  self.SaplingHeight * self.MiddleFoliagePortion * self.BottomFoliagePortion
-&#9;&#9;local size = self.FoliageForm * wanted_height
-&#9;&#9;local new = self.Foliage:Clone()
-&#9;&#9;new.Size = size
-&#9;&#9;new.Parent = self.TreeBase
-&#9;&#9;new.CFrame = self.MiddleFoliage.CFrame * CFrame.new(0, -self.MiddleFoliage.Size.y/2, 0) * CFrame.new(0, -new.Size.y/2, 0)
-&#9;&#9;self:UpdateWeld(new, self.TreeBase, new.CFrame, self.TreeBase.CFrame)
-&#9;&#9;self.BottomFoliage = new
-&#9;&#9;self.BottomFoliageTime = tick()
-&#9;end
-end
-
-function Tree:UpdateFoliage()
-&#9;local function mvfruit(part,ds)
-&#9;&#9;for i,v in pairs(part:GetChildren()) do
-&#9;&#9;&#9;if v.Name == self.Fruit.Name then
-&#9;&#9;&#9;&#9;local g1, g2 = self.FruitTicks[v][2], self.FruitTicks[v][3]
-&#9;&#9;&#9;&#9;local newcf = self:GetFruitPositionFromOffset(part, g1, g2)
-&#9;&#9;&#9;&#9;v.CFrame = CFrame.new(newcf)
-&#9;&#9;&#9;&#9;self:UpdateWeld(v, part,v.CFrame, part.CFrame)
-&#9;&#9;&#9;end
-&#9;&#9;end
-&#9;end
-&#9;-- Middle
-&#9;local wanted_height = self.WantedHeight * self.MiddleFoliagePortion
-&#9;local new_height = self:GetNewHeight(tick() - self.MiddleFoliageTime, wanted_height)
-&#9;if new_height &gt; self.MiddleFoliage.Size.y then 
-&#9;&#9;local size = self.FoliageForm * new_height
-&#9;&#9;local new = self.MiddleFoliage
-&#9;&#9;local ds = (size - new.Size)/2
-&#9;&#9;new.Size = size
-&#9;&#9;new.CFrame = self.TreeBase.CFrame * CFrame.new(0, self.TreeBase.Size.y/2, 0)
-&#9;&#9;self:UpdateWeld(new, self.TreeBase, new.CFrame, self.TreeBase.CFrame)
-&#9;&#9;mvfruit(new, ds)
-&#9;end
-&#9;
-&#9;-- Top
-&#9;local wh =  wanted_height * self.TopFoliagePortion
-&#9;local new_height = self:GetNewHeight(tick() - self.TopFoliageTime, wh)
-&#9;if new_height &gt; self.TopFoliage.Size.y then 
-&#9;&#9;local size = self.FoliageForm * new_height
-&#9;&#9;local new = self.TopFoliage
-&#9;&#9;local ds = (size - new.Size)/2
-&#9;&#9;new.Size = size
-&#9;&#9;new.CFrame = self.MiddleFoliage.CFrame * CFrame.new(0, self.MiddleFoliage.Size.y/2, 0) * CFrame.new(0, new.Size.y/2, 0)
-&#9;&#9;self:UpdateWeld(new, self.TreeBase, new.CFrame, self.TreeBase.CFrame)
-&#9;&#9;mvfruit(new, ds)
-&#9;end
-
-&#9;-- Bottom
-&#9;local wh =  wanted_height * self.BottomFoliagePortion
-&#9;local new_height = self:GetNewHeight(tick() - self.BottomFoliageTime, wh)
-&#9;if new_height &gt; self.BottomFoliage.Size.y then 
-&#9;&#9;local size = self.FoliageForm * new_height
-&#9;&#9;local new = self.BottomFoliage
-&#9;&#9;local ds = (size - new.Size)/2
-&#9;&#9;new.Size = size
-&#9;&#9;new.CFrame = self.MiddleFoliage.CFrame * CFrame.new(0, -self.MiddleFoliage.Size.y/2, 0) * CFrame.new(0, -new.Size.y/2, 0)
-&#9;&#9;self:UpdateWeld(new, self.TreeBase, new.CFrame, self.TreeBase.CFrame)
-&#9;&#9;mvfruit(new, ds)
-&#9;end
-end
-
-function Tree:GetRandomVector(min,max)
-&#9;-- height is 1
-&#9;local dx, dz = (max.x - min.x), (max.z - min.z)
-&#9;return Vector3.new(min.x + dx*math.random(), 1, min.z + dz * math.random())
-end
-
--- returns a random position under the part
-function Tree:GetFruitPosition(part)
-&#9;local delta = part.Size
-&#9;local function get() 
-&#9;&#9;local x = math.random() - 0.5
-&#9;&#9;if x &gt; 0 then 
-&#9;&#9;&#9;return (x + 0.5) * 0.5
-&#9;&#9;else
-&#9;&#9;&#9;return (x - 0.5) * 0.5
-&#9;&#9;end
-&#9;end
-&#9;local get_1 = get()
-&#9;local get_2 = get()
-&#9;local x,y,z = get_1 * delta.x, -0.5 * delta.y, get_2 * delta.z
-&#9;return (part.CFrame * CFrame.new(Vector3.new(x,y,z))).p, get_1, get_2
-end
-
-function Tree:GetFruitPositionFromOffset(part, g1, g2)
-&#9;local size = part.Size
-&#9;local x,y,z = g1 * size.x, -0.5 * size.y, g2 * size.z
-&#9;return (part.CFrame * CFrame.new(Vector3.new(x,y,z))).p
-end
-
-function Tree:GetFruitCount()
-&#9;local out = 0
-&#9;for i,v in pairs(self.TreeBase:GetChildren()) do
-&#9;&#9;for ind, val in pairs(v:GetChildren()) do
-&#9;&#9;&#9;if val.Name == self.Fruit.Name then
-&#9;&#9;&#9;&#9;out = out + 1
-&#9;&#9;&#9;end
-&#9;&#9;end
-&#9;end
-&#9;return out
-end
-
-function Tree:InitializeFruit()
-&#9;local make = self.WantedFruit - self:GetFruitCount()
-&#9;if make &gt; 0 then 
-&#9;&#9;for i,v in pairs(self.FruitTicks) do
-&#9;&#9;&#9;if not i:IsDescendantOf(self.TreeBase) then 
-&#9;&#9;&#9;&#9;self.FruitTicks[i] = nil
-&#9;&#9;&#9;end
-&#9;&#9;end
-&#9;
-&#9;&#9;for i = 1, make do 
-&#9;&#9;&#9;local parts = {self.TopFoliage, self.MiddleFoliage, self.BottomFoliage}
-&#9;&#9;&#9;local rem = {}
-&#9;&#9;&#9;for i,v in pairs(parts) do
-&#9;&#9;&#9;&#9;if v.Size.magnitude &lt;  self.MinimalFoliageFruitSize then 
-&#9;&#9;&#9;&#9;&#9;parts[i] = nil
-&#9;&#9;&#9;&#9;end
-&#9;&#9;&#9;end
-&#9;&#9;&#9;local temp = {}
-&#9;&#9;&#9;for i,v in pairs(parts) do
-&#9;&#9;&#9;&#9;table.insert(temp,v)
-&#9;&#9;&#9;end
-&#9;&#9;&#9;parts=temp
-&#9;&#9;&#9;if #parts &gt; 0 then 
-
-&#9;&#9;&#9;&#9;local new = self.Fruit:Clone()
-&#9;&#9;&#9;&#9;new.Size = Vector3.new(0.2,0.2,0.2)
-&#9;&#9;&#9;&#9;local part = parts[math.random(1,#parts)]
-&#9;&#9;&#9;&#9;local offset, g1,g2 = self:GetFruitPosition(part)
-&#9;&#9;&#9;&#9;self.FruitTicks[new] = {tick(), g1,g2}
-&#9;&#9;&#9;&#9;new.Parent = part
-&#9;&#9;&#9;&#9;new.CFrame = CFrame.new(offset)
-&#9;&#9;&#9;
-&#9;&#9;&#9;&#9;self:UpdateWeld(new,part,new.CFrame,part.CFrame)
-&#9;&#9;&#9;end
-&#9;&#9;end
-
-&#9;
-&#9;end
-end
-
-function Tree:UpdateFruit()
-&#9;for fruit,lasttick in pairs(self.FruitTicks) do
-&#9;&#9;local newh = self:GetNewHeight(tick() - lasttick[1], self.FruitTargetSize.y)
-&#9;&#9;if newh &gt; fruit.Size.y then
-&#9;&#9;&#9;local oldcf = fruit.CFrame
-&#9;&#9;&#9;fruit.Size = newh * self.FruitTargetSize
-&#9;&#9;&#9;fruit.CFrame =oldcf
-&#9;&#9;&#9;self:UpdateWeld(fruit, fruit.Parent, oldcf, fruit.Parent.CFrame)
-&#9;&#9;end
-&#9;end
-end
-
-function Tree:Initialize(Position, Ground)
-&#9;local IsRoom = WorldTools:IsRoom(Position + Vector3.new(0,self.RoomNeeded.y/2,0), self.RoomNeeded)
-&#9;if IsRoom then 
-&#9;&#9;self.LastTick = tick()
-&#9;&#9;self.Ground = Ground&#9;&#9;
-&#9;&#9;self.GroundPos = Position
-&#9;&#9;
-&#9;&#9;-- Generate the look of the tree!
-&#9;&#9;self.FoliageForm = self:GetRandomVector(self.FoliageFormMin, self.FoliageFormMax)
-&#9;&#9;self.TrunkForm = self:GetRandomVector(self.TrunkFormMin, self.TrunkFormMax)
-&#9;&#9;self.WantedHeight = self.MinHeight + math.random() * (self.MaxHeight - self.MinHeight)
-&#9;&#9;
-&#9;&#9;self.WantedFruit = math.random(1, self.MaxFruit)&#9;&#9;
-&#9;&#9;
-&#9;&#9;self.FruitTicks = {}
-&#9;&#9;
-&#9;&#9;self.GrowTime = self.GrowTimeMin + math.random() * (self.GrowTimeMax - self.GrowTimeMin)&#9;&#9;
-&#9;&#9;-- Let&apos;s incoroporate some animal crossing elements: shake trees!&#9;&#9;
-&#9;&#9;
-&#9;&#9;-- Create the base size!
-&#9;&#9;&#9;&#9;
-&#9;&#9;local NewTrunk = self.Trunk:Clone()
-&#9;&#9;self.TreeBase = NewTrunk
-&#9;&#9;self.StartTime = tick()
-&#9;&#9;NewTrunk.Parent = game.Workspace.Life
-&#9;&#9;NewTrunk.Size = self.SaplingHeight * self.TrunkForm
-&#9;&#9;self.TrunkRotation = math.random(1,360)
-&#9;&#9;NewTrunk.CFrame = CFrame.new(Position) * CFrame.new(0,NewTrunk.Size.y/2,0) * CFrame.Angles(0, math.rad(self.TrunkRotation), 0) -- oh so hipster
-&#9;&#9;self:UpdateWeld(NewTrunk, Ground, NewTrunk.CFrame, Ground.CFrame)
-&#9;&#9;self:InitializeFoliage()
-&#9;&#9;self:InitializeFruit()
-&#9;end
-&#9;return IsRoom
-end
-
-function Tree:GetNewHeight(dt,max)
-&#9;-- returns the new height
-&#9;local portion = dt/self.GrowTime
-&#9;if portion &gt;= 1 then return max end
-&#9;-- now ease...
-&#9;local ease = (-1 * ((portion-1)^2)) + 1
-&#9;return ease * max
-end
-
-
-
--- Grows a tick.
-function Tree:Grow() 
-&#9;-- Update the branch!
-&#9;if not self.TreeBase or self.TreeBase.Parent ~= game.Workspace.Life then 
-&#9;&#9;return false -- If false is returned DESTROY
-&#9;end
-&#9;local NewHeight = self:GetNewHeight(tick() - self.StartTime, self.WantedHeight)
-&#9;if NewHeight &gt; self.TreeBase.Size.y then 
-&#9;&#9;local dy = NewHeight - self.TreeBase.Size.y 
-&#9;&#9;self.TreeBase.Size = NewHeight * self.TrunkForm
-&#9;&#9;self.TreeBase.CFrame = CFrame.new(self.GroundPos) * CFrame.new(0,  self.TreeBase.Size.y/2, 0)  * CFrame.Angles(0, math.rad(self.TrunkRotation), 0)
-&#9;&#9;self:UpdateWeld(self.TreeBase, self.Ground, self.TreeBase.CFrame, self.Ground.CFrame)
-&#9;end
-&#9;self:InitializeFoliage()
-&#9;self:UpdateFoliage()
-&#9;self:InitializeFruit()
-&#9;self:UpdateFruit()
-&#9;self.LastTick = tick()
-&#9;return true
-end
-
-function Tree:Generate()
-
-&#9;self.StartTime = 0
-&#9;self.MiddleFoliageTime = 0
-&#9;self.TopFoliageTime = 0
-&#9;self.BottomFoliageTime = 0
-
-&#9;self:Grow()
-&#9;for i,v in pairs(self.FruitTicks) do
-&#9;&#9;v[1] = 0
-&#9;end
-&#9;self:UpdateFruit()
-end
-
-
-return Tree</ProtectedString>
 				</Properties>
 			</Item>
 		</Item>

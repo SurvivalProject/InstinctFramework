@@ -2,6 +2,11 @@
 -- Additional modules can be launched from here
 -- Insertion points are provided
 
+local Palette = Instinct.Include "Utilities/Palette"
+local Locale = Instinct.Include "Services/Locale"
+local Presets = Instinct.Include "Gui/GuiPresets"
+local Dim = Instinct.Include "Gui/DimTools"
+
 local MainMenu = {}
 
 MainMenu.TitleFont = "ArialBold"
@@ -21,11 +26,6 @@ MainMenu.ButtonFontSize = "Size24"
 MainMenu.WhiteSpace = 20
 MainMenu.ButtonShading = 2 -- wow so much shading
 MainMenu.XOffset = 50
-
-local Palette = Instinct.Include "Utilities/Palette"
-local Locale = Instinct.Include "Services/Locale"
-local Presets = Instinct.Include "Gui/GuiPresets"
-local Dim = Instinct.Include "Gui/DimTools"
 
 local Player = game.Players.LocalPlayer
 
