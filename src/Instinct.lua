@@ -11,6 +11,7 @@
 -- Probe environment
 
 local pre = _G.__InstinctPresets
+
 local ltype
 if pre then
 	ltype = pre.LoadType
@@ -49,9 +50,15 @@ Utilities/ColorTools
 Utilities/Palette
 ]=]
 
+local root
+local lfs 
 
-
-local root = game:GetService("ReplicatedStorage").Instinct
+if ltype == "term" then 
+	lfs = require "lfs"
+	root = lfs.currentdir()
+else 
+	root = game:GetService("ReplicatedStorage").Instinct
+end 
 
 --[[ Instinct.Load
 	@arg1: List (newline seperated module load list)
@@ -61,16 +68,33 @@ function Instinct.Load(List, only)
 		local newroot = root
 		local objpointer = Instinct -- pointer to the table 
 		local previous = objpointer
+		if ltype == "term" then 
+			lfs.chdir(root)
+		end
+		local LastNameTry
 		for NameMatch in ModuleName:gmatch("(%w+)/?") do
-			local try = newroot:FindFirstChild(NameMatch)
+			LastNameTry = NameMatch
+			if ltype ~= "term" then 
+				try = newroot:FindFirstChild(NameMatch)
+			else 
+				lfs.chdir(NameMatch)
+				try = lfs.currentdir()
+			end 
 			if try then
 				newroot = try
-				if try:IsA("Model") and not objpointer[try.Name] then 
+				if not ltype == "term" and try:IsA("Model") and not objpointer[try.Name] then 
 					objpointer[try.Name] = {} 
 					objpointer = objpointer[try.Name]
 					previous = objpointer
-				elseif try:IsA("Model") then
+				elseif ltype == "term" and lfs.attributes(".").mode == "directory" and not objpointer[NameMatch] then 
+					objpointer[NameMatch] = {}
+					objpointer = objpointer[NameMatch]
+					previous = objpointer
+				elseif not ltype == "term" and  try:IsA("Model") then
 					objpointer = objpointer[try.Name]
+					previous = objpointer
+				elseif ltype == "term" and lfs.attributes(".").mode == "directory" then 
+					objpointer = objpointer[NameMatch]
 					previous = objpointer
 				end
 			else 
@@ -78,22 +102,41 @@ function Instinct.Load(List, only)
 				break
 			end	
 		end
-		if newroot and newroot:IsA("ModuleScript") and previous then 
-			local Name = newroot.Name
-			print("Info", "Load: "..Name, newroot:GetFullName())
-			local out = require(newroot)
-			if type(out) == "table" and Instinct.Create and not out.__noreg then
-				Instinct.Create.Register(out)
-				Instinct.Create.RegisterClassName(Name, out)
+		if ltype ~= "term" then 
+			if newroot and newroot:IsA("ModuleScript") and previous then 
+				local Name = newroot.Name
+				print("Info", "Load: "..Name, newroot:GetFullName())
+				local out = require(newroot)
+				if type(out) == "table" and Instinct.Create and not out.__noreg then
+					Instinct.Create.Register(out)
+					Instinct.Create.RegisterClassName(Name, out)
+				end
+				previous[Name] = out
+				if only then 
+					return out
+				end
+			else
+				print("Error", "Load: Unable to load module: "..ModuleName..", module does not exist!")
 			end
-			previous[Name] = out
-			if only then 
-				return out
+		else 
+			print(newroot,LastNameTry)
+			if newroot and lfs.attributes(newroot .. "/" .. LastNameTry..".lua").mode == "file" and previous then 
+				
+				print("Info", "Load: "..LastNameTry, newroot)
+				lfs.chdir(newroot)
+				local my = loadfile(LastNameTry)
+				if type(my) == "table" and Instinct.Create and not out.__noreg then 
+					Instinct.Create.Register(my)
+					Instinct.Create.RegisterClassName(LastNameTry, my)
+				end
+				previous[LastNameTry] = out 
+				if only then 
+					return my 
+				end
 			end
-		else
-			print("Error", "Load: Unable to load module: "..ModuleName..", module does not exist!")
-		end
+		end 
 	end
+	lfs.chdir(root)
 end
 
 function Instinct.Include(name)

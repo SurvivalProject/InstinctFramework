@@ -1,0 +1,1 @@
+tmod = require "termloader"
