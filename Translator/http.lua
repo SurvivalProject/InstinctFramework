@@ -6,7 +6,7 @@ http.httpversion = "1.1" -- orly
 
 http.statuscodes = {
 	[200] = "OK",
-	[302] = "FOUND",
+	[302] = "Found",
 	[404] = "NOT FOUND"
 }
 
@@ -21,11 +21,30 @@ function http.response(status,headers,content, conn, writef)
 	for i,v in pairs(headers) do 
 		out = out .. i .. ": "..v .. "\r\n"
 	end 
-	out = out .. "Content-Length: ".. (content:len() + 2)  .. "\r\n\r\n"
-	out = out .. content
+	out = out .. "Content-Type: text/html\r\n"
+	out = out .. "Content-Length: ".. (content:len())  .. "\r\n\r\n"
+	out = out .. content 
 
-	return content 
+	return out
 end
+
+-- returns all header options into a table
+function http.getremheader(conn, readf)
+	local line = " "
+	local out = {}
+
+	while line and line ~= "" and line ~= "\r\n" do 
+		line = readf(conn, "*l")
+		print("Line eval", line )
+		local option, value = line:match("([^:]*) (.*)")
+		if option and value then 
+			out[option] = value 
+			print("hellu", option:len(), option, value)
+		end 
+	end 
+	return out 
+end
+
 
 -- reads from conn with provided read function
 -- until content lenght is found; that is returned as number

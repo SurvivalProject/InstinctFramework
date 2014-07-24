@@ -10,6 +10,7 @@
 
 -- Probe environment
 
+
 local pre = _G.__InstinctPresets
 
 local ltype
@@ -37,6 +38,10 @@ Services/Locale
 Event
 ]=]
 
+Instinct.Term = [=[
+Local/rbxinstance
+]=]
+
 Instinct.Client = [=[
 Console
 Menu
@@ -53,12 +58,29 @@ Utilities/Palette
 local root
 local lfs 
 
+-- Define error throw function 
+
+function throw(err, level)
+	print(err)
+end 
+
 if ltype == "term" then 
 	lfs = require "lfs"
 	root = lfs.currentdir()
+	lfs.chdir("../Translator")
+	prettyprint = require "prettyprint"
+	function print(...)
+		prettyprint.write("Instinct", "info", ...)
+	end 
+	function throw(err, level)
+		prettyprint.write("Instinct", "error", err)
+	end
+	lfs.chdir(root)
 else 
 	root = game:GetService("ReplicatedStorage").Instinct
 end 
+
+prettyprint.write("Instinct", "info", "Welcome to Instinct!")
 
 --[[ Instinct.Load
 	@arg1: List (newline seperated module load list)
@@ -152,6 +174,9 @@ function Instinct.Initialize(mode)
 		Instinct.Server = nil
 		Instinct.Load(Instinct.Global)
 		Instinct.Load(Instinct.Client)
+	elseif mode == "term" then 
+		Instinct.Load(Instinct.Global)
+		Instinct.Load(Instinct.Term)
 	end
 end
 

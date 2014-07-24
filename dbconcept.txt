@@ -1,0 +1,68 @@
+Stranded is all about crafting. Therefore the organization of crafts should be flexible and it should be very easy to define new ways of crafting.
+
+Because of that, the API behind the crafting should also be flexible and general. This is extremely hard to be done though as it is unknown what features will be added in the future; if the API is not general enough it will be very hard to incorporate those features. 
+
+In all kinds of recipes we can distinguish two main things: 
+
+-> Resources
+-> Context
+
+The Resources are quite straightforward; these are just the resources which are available in a certain place.
+The Context is less straightforward: it is the environment the resources are in.
+
+What kind of recipes do we have? And why do we want it all being recipes?
+This makes it possible to create a general recipe feature in the future - we can define furnace recipes in a general recipe book, which is awesome as the normal guides for the old game where insufficient as most items such as tool heads where made from tools - if this is a recipe we have a central place to derive this info from!
+
+The most general recipe is just the normal way of crafting things: having certain ingredients in the backpack and combining them. In "real life" this would just be as much as putting a tool head on a handle -> very simple. In real life this would probably not be the major type of recipes.
+
+Another type of recipes are tool conversion recipes. Normally this would go as much as clicking a certain resource to convert it. However with the new game idea in mind (knapping for example) this will be even harder to define...
+
+How the #### am I supposed to do this?
+
+We know that the concept of this recipe is as following:
+
+-> The item is not in the backpack, but it is outside: we can pick it up.
+-> We have equipped a hammer
+-> We are hammering the stone
+-> We have knapped the stone in the right shape
+-> The stone has a lower or same tier as the used stone.
+
+Christ, that's hard to define in a ruleset. On paper this is simple to do: it is simple to script too. But in order to manage to create a service for the game which can handle these kinds of recipes - thats gonna be extremely hard.
+
+I simply don't know how to effectively create it ... 
+Let's brainstorm some more.
+
+I think I should not try to make everything a recipe: farming for example would be hard to incorporate as recipe...
+
+Maybe a creation book service thing would do the trick, which would not use recipes as general thing.
+
+On the other hand, defining everythign as a recipe would probably be a good idea. Everything in the game is actually a recipe. 
+
+Maybe it is not really a recipe - it is an action...
+If I could manage to define all game changes and checks as an action, that would do the trick...
+
+Why haven't I thought of this kind of thing earlier? 
+
+A general scheme would look like this: 
+
+Check for actions which could be done ->
+Check if these actions can be done ->
+Execute action code 
+
+This would also allow a global scheme for task buffers
+
+
+
+
+
+I finally got it. Via an another approach, that is.
+It is much handier to define everything as an object. Tools, buildings, resources. They all are threated the same way. 
+
+I already saw that it was very handy to define all kinds of little GUI classes and let the framework handle all those stupid things as spacing. I just feed it some data and it magically works.
+
+For objects this will go the same. Furnaces will eat any object, define their contexts, and let the framework do the dirty work on figuring out what can be done.
+
+In fact, it will be possible to really add new crafts with some code lines: we just define behaviour. The whole world will accept this behaviour because of expected instances.
+If new features are added, for example cooking bread, this would only need a small change in the base code of every object.
+Lovely.
+

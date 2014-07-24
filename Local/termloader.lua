@@ -8,4 +8,6 @@ lfs.chdir("../src")
 
 Instinct = require "Instinct"
 
+_G.Instinct = Instinct 
+
 return Instinct

@@ -1,0 +1,124 @@
+-- Stranded game concept -- 
+
+The following document describes some proposed game concepts for the game "Stranded"
+
+Contents: 
+
+1. Definitions
+2. History
+3. Overview
+4. Features
+
+///// Definitions
+
+The following definitions can be found through this document:
+
+old game: the old game of Stranded - the first game created
+old new game: the old new game is the sequel of the old game
+new game: the game where this document is all about
+
+///// History
+
+For a long time I have been a gamer. Not a very hardcore gamer though. My favorite game was Rollercoaster Tycoon. I remember playing it at my nephew - I couldnt sleep every night before we would get there. As soon as I saw it in a shop, I decided to buy it. I was very young at the time.
+
+I have played much more games, but my parents have always prevented me from playing shooters. I didn't really care though. I played a lot of other games but I always fell back on RCT. I just liked tycoon games, I guess. I also was a huge fan of Transport Tycoon, which was the first game I played in English. Not that I had too: I just didn't know that Dutch meant the Dutch language, as we know it as "Nederlands" and not Dutch. I thought it was the German language, as it is "Duits" in the Dutch language.
+
+I played some other games too - games which everyone played I guess. I liked platform games, especially Mario games. Mario 64 for the Nintendo 64 was also one of the games which I could only play at my nephews and was another reason I couldnt sleep if we went there. When I bought a Nintendo DS the mario 64 version for the DS was the first game I bought.
+
+I never had internet too. I guess I was 8 when I first got internet - I didnt even know what it was. I loved it though. I guess when I was 10 I first tried to program something. I tried using C++ but I didn't understand it at all. I thought the print function would create some big text on the screen and never opened output to figure out that it was there. I got frustrated and stopped programming. I knew though that creating a game would always be something I would like to do, but at the time I didnt think that was possible.
+
+When I was 13 I was playing the third version of RCT which is in 3D. Despites being critisized for its ugly graphics and "un-RCT-like-gameplay" - I liked it. I always tried to create a beautiful park which I did succeed in. Building and being creative on that game was something I could do, but which I can't do right now on Roblox.
+
+I searched some cool park videos on youtube, but the general videos on there where all about crazy rollercoasters which exploded and killed people. I didn't like that. My eye fell on a good looking coaster. I started the video but after 5 seconds I saw that it was not RCT, but another game... Roblox.
+
+That's when I first got on Roblox. The first game I played was some crappy cart ride. I immediately trolled people by blocking the track. Within 5 minutes of my account creation I already got reported for bad behaviour. Excellent. My account name was a nickname I always have used - also in my childhood - Jobro - with my age at the time - 13. This nickname comes from the first 2 letters of my first name and the 3 first letters of my last name.
+
+I didnt know for a long time that we could create games on Roblox. Quite stupid, right? The studio feature was hidden though. I remember figuring it out around a year after creating my account after playing a pokemon game. I wanted to create my own pokemon game and started. I never understood how to script though - I tried, but never got the part that scripts always run and that you dont need to explicitly "call" a script to run.
+
+It was a little later, when I was 15, when I found the game Survival 404. I had played these games before but never got how to play and got bored fast. I remember being invited over there after playing Nano Wars. I was all alone, someone came in, played a game with me and then said that he/she was going to Survival 404. I was bored so decided to join. This person invited me to the game concept.
+
+That was around the time I had a very long weekend due to holidays in Holland. I dont exactly remember when that was, but I did play the game a lot that weekend. I fell in love with the concept. I had never played a game before which has so much emotion in it. Being killed makes one so angry, and killing people was so fun to do.
+
+I figured out some ugly glitches in the game which allowed me to kill everyone in teh server extremely fast. I even remember my general workflow by then. I first made sure to spawn on the island which had hemp on it. I created a schooner within a minute and then set sail to a forge. I only needed one iron to create my weapons. Or not. I sometimes refrained from creating tools - I just created 5 crude clubs and spam clicked on people to kill them. Of course I was calling a hacker because people thought I had a one hit ko crude club. I was just abusing some glitch. 
+
+If you ever get the patience you can scroll back to the comments by then. I was a huge troll at the time and everyone cried when I entered the server. I liked it though. Sometimes I sat down and played "normally", creating some cool things. I wrote a lot of stuff down on things I would like to see, as the game was regularily updated.
+
+I then went on vacation and after I came back I played the game again. I also played previous versions of the game, aswell the 303 version. 404 was way too simple though and I liked to troll on there, so that was my main game.
+
+Then, in the end of august 2011, a roblox update broke the game. We couldnt retool buildings anymore. The craetor of the gmae announced that he would not fix these updates and I got extremely angry. I tried to mobilize some people to force the creator in updating it, but as you all know this is something that doesnt work on roblox. It didnt work.
+
+That was the time when I decided that I would need to fix this myself. In order to do so, I would recreate the whole game. I started recreating the islands. After a week I realized that this would not work. Why would someone want to play a non-official non-broken game with some added features? No one. I realized that this was the time to start my own game. 
+
+Development went slow though, very slow. I tried to script some things but I just couldnt get a hang of it. Therefore it was a more conceptual development with lots of notes being written down. I remember going back to 404 a lot to survey people on what they would like to see.
+
+Around 3 months after this "idea" - In January, 2012, I posted a forum post on the roblox forum describing my intentions. If I remember it correctly it had to follow the survival 101-202-303-404 style, thus having sequels. Thats why it was called Episode One in the first place. This idea was later reverted.
+
+It was very stupid of me to think that people would get interested by only some text post. People want to see things and people want to play things. I put up some game but no one came. I had a reply from Chiefwaffles, a 303 dev at the time, on my topic though, which made me feel happy.
+
+No one came to the game I put up. I decided to go back to 404 one last time and if no one would come with me I would drop development. Luckily for me, someone had interest and responded to my "come to my pleic" call. No, of course, I didnt ask it like that. I started with my normal survey again and said that I had a game put up. Darkburst369 came to my game and we discussed the future of it.
+
+Thats when development really started. I finally created my first script: a health bar. I put it online immediately. Next up where some other features: pick up, backpack, etc.
+
+The development game at the time was restricted to developers only; people who showed interest in the game. It was friends only and the account started to attract a lot of friend requests. Most of these people got invited by people who already came there. I invited people to build things for the game. Which buildings did people want? Etc.
+
+At some point I put the game on my own profile. I dont really remember how I did taht at the time, if I promoted it, etc. I have a hunch it was just some pulse I got: I wanted to show the general public what we had at the time.
+
+That was the start of a cozy community. I will skip over some things here, but this is what happened. I created a game group, managed the forum topic and managed the game. The game got a lot of updates with small features. I added recipes. In the end, the game was huge with a lot of features. Over 50 differetn fish, 300 building parts, 150 recipes and over hours of gameplay. It was epic.
+
+There was one big problem: the games code was unorganized and I couldnt find things back which really slowed the development down. At that poitn I decided to make a new game. Why? I have no idea. The game was succesful, so why tear it down? Why not organize the code? This may have been my biggest mistake.
+
+What made things worse is that I decided to create some crappy game engine which I first had to equip with all kind of useles features. The code was advanced and written really well, but the use of the code was zero: none, nothing. It took me too damn long to create a first version of the game.
+
+This first version had some awesome features though: CFrame offset buildings which allowed to create rotated buildings and to place buildings inside and also dual wielding. The UI was clean, but not really handy and new players found it difficult to figure out the controls.
+
+It improved over time but after 3 months I decided that this wouldnt work. The game didnt get any attention and for some kidn of reason the old game had more visits than this new old game. 
+
+There is one big thing I did learn about creating the old new game. Game development is not about your scripting skills, it is about creating a fun game. This is much harder than you would believe and I believe that creating something fun is much harder than creating a game itself. 
+
+Another thing I learned from the game is better and more organized scripting, which is going to help me in creating the new game. There has been a huge loss of time, but I could also see this as a break to polish some skills.
+
+And then we are here, right now. Around 3 weeks ago I decided to go back to the old game and to restore how it was. I will discuss how this is done soon. As you can see my love for survival games has not yet faded and I have worked almost a stunning 3 years on this project. Lets hope I succeed this time.
+
+///// Overview
+
+Lets first list the features of the old and the old new game.
+
+Old game
+* Huge building set
+* Huge recipe list
+* Huge toolkit
+* Tribes
+* Huge world
+
+Old new game
+* Dual wielding
+* Offset building
+* Saving
+* Backpack dropping
+* Corpses
+
+The new game should get the same feel as the old game. The UI will be polished. The controls will be intiutive and should be able to be changed to fit the need of the player. The offset buildign system is too complicated to script. Instead, we should get a true custom building system. The old game had a custom building KIT, this game should get a custom building FEATURE, which means that parts you need can be created and shaped by yourself. Helper tools should be available to get these pieces on the right place. 
+
+The new game should be as the old game is intended. I had some nice ideas for the old game, and the community had them too, but they were never included as I could not script them. I believe I can do now.
+
+One of the features is a well distributed random grown tree system. This was also in the old new game but it is even better in the new game. The trees dont have a lot of parts but still look good. They are randomly distributed across the map.
+
+Another thing which has to change is a linear way of crafting things. In the old game there was one way to create higher tier recipes. This game will get more ways and multiple ways to create the same thing. In general: a simple but slow way and a complicated (and risky) fast way.
+
+/////// API
+
+The API should be very flexible and easy to use - for everyone
+It is okay that the internal code is hard to understand for outsiders
+One of the main features of the API is that it is built around a framework. This framework is built around low level entities which expand in higher level ones; changing the behaviour of the low level ones should not error the high level ones; the high level ones should respect changes to the low level entities and should be able to adapt the new behaviour
+
+For Stranded one of the main API items is of course the Resource item which needs to be accepted by a lot of classes and services. A Resource should be put in a certain ResourceContext if this resource wants to change.
+
+An example context would be the crafting context: it is in the backpack (Attribute: InBackpack).
+Recipes should be checking if the resources are one of the requested resources. This can also be pulled back to extended resources. If this is okay it should check if the attributes and context is right and then should figure out if a change is done automatically or manually (via the crafting screen)
+
+Example:
+
+Pickaxe
+Resource: Pickaxe Head :: Attribute: Metal
+
+
