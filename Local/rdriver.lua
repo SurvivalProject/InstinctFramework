@@ -59,4 +59,6 @@ end
 
 
 -- How would a knapping recipe work then 
+-- Ya we use the context
+-- We define Context.
 

@@ -104,20 +104,24 @@ function Instinct.Load(List, only)
 			end 
 			if try then
 				newroot = try
-				if not ltype == "term" and try:IsA("Model") and not objpointer[try.Name] then 
+				if ltype ~= "term" and try:IsA("Model") and not objpointer[try.Name] then 
 					objpointer[try.Name] = {} 
-					objpointer = objpointer[try.Name]
 					previous = objpointer
+					objpointer = objpointer[try.Name]
+					
 				elseif ltype == "term" and lfs.attributes(".").mode == "directory" and not objpointer[NameMatch] then 
 					objpointer[NameMatch] = {}
-					objpointer = objpointer[NameMatch]
 					previous = objpointer
-				elseif not ltype == "term" and  try:IsA("Model") then
+					objpointer = objpointer[NameMatch]
+					
+				elseif ltype ~= "term" and  try:IsA("Model") then
+					previous = objpointer
 					objpointer = objpointer[try.Name]
-					previous = objpointer
+					
 				elseif ltype == "term" and lfs.attributes(".").mode == "directory" then 
-					objpointer = objpointer[NameMatch]
 					previous = objpointer
+					objpointer = objpointer[NameMatch]
+				
 				end
 			else 
 				newroot = nil 
@@ -146,19 +150,33 @@ function Instinct.Load(List, only)
 				
 				print("Info", "Load: "..LastNameTry, newroot)
 				lfs.chdir(newroot)
-				local my = loadfile(LastNameTry)
-				if type(my) == "table" and Instinct.Create and not out.__noreg then 
+				local my, err = loadfile(LastNameTry..".lua")
+				if type(my) == "function" then 
+					my = my()
+					print(tostring(my))
+					if type(my) == "table" then 
+						for i in pairs(my) do print(i) end 
+					end 
+				else 
+					throw(" load err " .. tostring(err))
+				end 
+				previous[LastNameTry] = my
+		
+
+				if type(my) == "table" and Instinct.Create and not my.__noreg and not LastNameTry == "Create" then 
 					Instinct.Create.Register(my)
 					Instinct.Create.RegisterClassName(LastNameTry, my)
 				end
-				previous[LastNameTry] = out 
+				
 				if only then 
 					return my 
 				end
 			end
 		end 
 	end
-	lfs.chdir(root)
+	if ltype == "term" then 
+		lfs.chdir(root)
+	end 
 end
 
 function Instinct.Include(name)

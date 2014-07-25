@@ -12,8 +12,16 @@ local ObjectService = {}
 -- x meters per studs; used for all kinds of calculations
 ObjectService.StudsLength = 0.2 
 
+ObjectService.ObjectData = {}
+
 function ObjectService:Constructor()
 	self.ObjectData = {}
+end
+
+function ObjectService:AddObjects(list)
+	for _, obj in pairs(list) do 
+		self:AddObject(obj)
+	end 
 end
 
 function ObjectService:AddObject(Object)
@@ -58,3 +66,4 @@ function ObjectService:ConvertStudVolume(studvolume)
 	return Real * 1000 -- is dm^3
 end 
 
+return ObjectService

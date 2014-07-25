@@ -13,9 +13,23 @@
 -- context and properties are basically the same
 -- easire to branch between 
 
+-- NOTE
+-- For some objects we want a general "object"
+-- such as a Crucible
+-- but multiple "tiers" of it
+-- ex: Bronze Crucible
+-- In order to manage to do this use the following:
+--> The in game identifier should be Crucible
+--> A context variable should be set: the tier
+--> This is of course derived from the bronze "object"
+--> Which is a helper object to figure out the properties for
+-- bronze
+--> The in game name should be stored in a variable to 
+-- make sure it shows correctly on GUIs
+
 local Object = {}
 
-local ObjectService = Instinct.Include "Services/ObjectService"
+local ObjectService = Instinct.Include( "Services/ObjectService" )
 
 Object.InfoName = 'objinfo'
 Object.ContextName = "contextinfo"
@@ -26,6 +40,17 @@ Object.InfoClassName = "Configuration"
 --> table (extend more objects)
 
 Object.ExtendedBy = nil 
+
+function Object:CreateExtension(name)
+	if self.Name ~= "Object" then 
+		local new = Instinct.Create(self)
+		new.ExtendedBy = self.Name 
+		new.Name = name or "Object"
+		return new 
+	else 
+		throw "rename object first"
+	end
+end 
 
 local IsServer = _G.__InstinctPresets.LoadType == "Server"
 local IsTerm = _G.__InstinctPresets.LoadType == "term"
