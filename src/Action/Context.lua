@@ -9,7 +9,10 @@ function Context:SetLocation(rbxinstance)
 	if o then 
 		self.Location = o 
 		self.RBXLocation = rbxinstance
-	end
+	else 
+		
+		throw(rbxinstance.Name .. " obj not available")
+	end 
 end
 
 return Context

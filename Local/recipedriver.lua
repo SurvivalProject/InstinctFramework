@@ -32,7 +32,9 @@ end
 
 print(Instinct.Create)
 
-for i,v in pairs(Instinct.Create) do print(i) end 
+for i,v in pairs(Instinct.Create) do print(i) end
+
+require "stonecap" 
 
 local Metal = Instinct.Create(Object)
 
@@ -86,6 +88,8 @@ test.Ingredients = {
 
 test.Created = "Bronze"
 
+print(lfs.currentdir())
+lfs.chdir("../Local")
 require "ruleset"
 
 test:SetCategory("Furnace")

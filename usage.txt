@@ -1,0 +1,5 @@
+How does the current setup work? (Notes for self and others)
+
+Due to the high demand of dynamic (non-linear) recipes in the game, I have created a bunch of Classes which will help in defining these classes via a lot of helper functions.
+
+The most abstract class is the Object, which is basically the main layer between Instinct and Roblox. It basically extends 

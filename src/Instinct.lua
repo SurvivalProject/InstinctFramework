@@ -69,11 +69,22 @@ if ltype == "term" then
 	root = lfs.currentdir()
 	lfs.chdir("../Translator")
 	prettyprint = require "prettyprint"
+	WARNINGS = {}
 	function print(...)
 		prettyprint.write("Instinct", "info", ...)
 	end 
 	function throw(err, level)
 		prettyprint.write("Instinct", "error", err)
+	end
+	function throwfrom(title, err, level)
+		prettyprint.write(tostring(title), "error", err)
+	end
+	function printm(title, subject, ...)
+		prettyprint.write(title, subject, ...)
+	end 
+	function warn(warning)
+		printm("Instinct", "warning", warning)
+		table.insert(WARNINGS, warning)
 	end
 	lfs.chdir(root)
 else 
@@ -150,16 +161,8 @@ function Instinct.Load(List, only)
 				
 				print("Info", "Load: "..LastNameTry, newroot)
 				lfs.chdir(newroot)
-				local my, err = loadfile(LastNameTry..".lua")
-				if type(my) == "function" then 
-					my = my()
-					print(tostring(my))
-					if type(my) == "table" then 
-						for i in pairs(my) do print(i) end 
-					end 
-				else 
-					throw(" load err " .. tostring(err))
-				end 
+				local my, err = require(LastNameTry)
+
 				previous[LastNameTry] = my
 		
 
@@ -169,6 +172,9 @@ function Instinct.Load(List, only)
 				end
 				
 				if only then 
+						if ltype == "term" then 
+							lfs.chdir(root)
+						end 
 					return my 
 				end
 			end

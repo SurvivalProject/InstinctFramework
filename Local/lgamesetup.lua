@@ -7,8 +7,10 @@ local newrbx = Instinct.Create(rbxinstance)
 newrbx.Name = "Crucible"
 
 local newcontext = Instinct.Create(Context)
-
+print(Instinct.Services.ObjectService.ObjectData.Crucible, 1 )
 newcontext:SetLocation(newrbx)
+
+print(newcontext.Location)
 
 World = {
 	ctx = newcontext,

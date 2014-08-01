@@ -67,6 +67,7 @@ function Object:SetPropertyCat(Instance, PropertyName, Value, Cat)
 		elseif IsTerm then 
 			local new = Instinct.Local.rbxinstance:new(self.InfoClassName)
 			new.Name = Cat
+			new:SetParent(Instance)
 		else 
 			throw("No server contact rule defined yet - no action taken")
 			return 1
@@ -82,12 +83,14 @@ function Object:SetPropertyCat(Instance, PropertyName, Value, Cat)
 	end
 
 	if IsServer and make then 
-		local my = Instance.new(make, Instance[self.InfoClassName])
+		local my = Instance.new(make, Instance[Cat])
 		my.Value = Value 
 		my.Name = PropertyName
 	elseif IsTerm and make then 
 		local my = Instinct.Local.rbxinstance:new(make)
-		my:SetParent(Instance)
+		my.Name = PropertyName
+		my.Value = Value 
+		my:SetParent(Instance:FindFirstChild(Cat))
 	end
 end 
 
@@ -128,6 +131,10 @@ function Object:GetConstant(const)
 	if self.ExtendedBy then 
 		if type(self.ExtendedBy) == "string" then 
 			local other = ObjectService:GetObject(self.ExtendedBy)
+			if not other then 
+				throw(self.ExtendedBy .. " is not a valid object")
+				return 
+			end 
 			local data = other:GetConstant(const)
 			for _,c in pairs(data) do 
 				table.insert(out, c)
@@ -148,6 +155,7 @@ end
 -- figures out if the object has a ceratin constant 
 function Object:HasConstant(const, val)
 	-- figuring out if value is ok
+	printm("Object", "info", "checking for constant " .. const )
 	local values = self:GetConstant(const)
 	for _, value in pairs(values) do 
 		if value == val then 

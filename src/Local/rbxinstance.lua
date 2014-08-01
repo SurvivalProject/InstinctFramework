@@ -7,6 +7,7 @@ function Instance:new(classname)
 end 
 
 function Instance:FindFirstChild(what)
+	--printm("RBX-TestInstance", "info", "FFC call: " .. what )
 	if self.Children and self.Children[what] then 
 		return self.Children[what][1]
 	end 
@@ -27,6 +28,9 @@ end
 
 function Instance:SetParent(parent)
 	-- haxy 
+	if parent == nil then 
+		throw (" provide a parent ")
+	end 
 	rawset(self, "Parent", parent)
 	if not parent.Children then 
 		parent.Children = {} 

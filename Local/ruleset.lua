@@ -10,46 +10,60 @@ local functemplate = function (RuleData, RuleSet, RuleType,
 
 
 -- amount only function to receive the whole list
-local function checkamount(RuleData, RuleSet, RuleType, 
-	Context, List, Recipe, wl)
-	local ingwant = RuleType[2]
+-- hard list of possible ingredients
+-- returns a list of useable ingredients!
+local function checkamount(arg)
+	local ingwant = arg.RuleType[2]
 	local have = 0
 	local ok = false 
-	local skipd = {"Explicit"}
-	if List[ingwant] then 
-		if #(List[ingwant]) >= RuleData then 
+	local skipd = {"Explicit", "AmountType", "Same"}
+	print(ingwant)
+	if arg.List[ingwant] then 
+
 			ok = true 
-			for i = 1, RuleData do 
-				List.Used:Add(List[ingwant][i])
+			for i = 1, #(arg.List[ingwant]) do 
+				arg.List.Used:Add(ingwant, arg.List[ingwant][i])
 			end 	
-		end 
-	elseif not RuleData.Explicit then 
+		 
+	elseif not arg.RuleSet.Explicit then 
 		for _,idata in ipairs(List) do 
 			local obj = idata[2]
 			if obj:HasConstant("Name", ingwant) then 
-				have = have + 1 
-				List.Used:Add(idata[1])
+				
+				arg.List.Used:Add(ingwant, idata[1])
 
-				if have >= RuleData then 
+			--[[	if have >= RuleData then 
 					ok = true 
 					break 
-				end
+				end--]]
 			end 
 		end
 	end 
 	return ok, skipd
 end
 
-local function checktemp(RuleData, RuleSet, RuleType, 
-	Context, List, Recipe, WholeList )
-	local mode = RuleData[1]
-	local eq = RuleData[2] 
+local function checktemp(arg) 
+	local mode = arg.RuleData[1]
+	local eq = arg.RuleData[2] 
 	if mode == "L" then 
-		for i,v in ipairs(List) do 
-			if v:GetConstant("Temperature") > RuleData then 
+		for i,v in ipairs(arg.List) do
+
+			if arg.Mode == 2 then 
+				printm("RuleCheck", "info", "check " .. arg.RuleType[2])
+			end 
+			local temp =  arg.List.Object:GetContext(v, "Temperature")
+			if not temp then 
+				throw("no temp var  found ")
+				return false 
+			end 
+			if arg.Mode == 2 then 
+				printm("RuleCheck", "info", "t value found, is " .. temp)
+			end 
+			if temp  > arg.RuleData[2] then 
 
 			else 
-				WholeList.Used:Delete(v)
+				arg.WholeList.Used:Delete(RuleType[2], v)
+				printm("RuleCheck", "info", "Removed " .. arg.RuleType[2] )
 			end 
 		end 
 		return true 
@@ -60,17 +74,15 @@ local function chkloc(loc, what )
 	return loc:HasConstant( what,true )
 end 
 
-local function checkfurnace(RuleData, RuleSet, RuleType, 
-	Context, List, Recipe, WholeList)
-	if Context.Location then 
-		return chkloc(Context.Location, "IsFurnace")
+local function checkfurnace(arg)
+	if arg.Context.Location then 
+		return chkloc(arg.Context.Location, "IsFurnace")
 	end 
 end 
 
-function checkmix(RuleData, RuleSet, RuleType, 
-	Context, List, Recipe, WholeList)
-	if Context.Location then 
-		return chkloc(Context.Location, "IsMetalMixingDevice")
+function checkmix(arg)
+	if arg.Context.Location then 
+		return chkloc(arg.Context.Location, "IsMetalMixingDevice")
 	end 
 end 
 

@@ -13,6 +13,8 @@ local RecipeService = {}
 
 RecipeService.Categories = {}
 
+RecipeService.Rules = {}
+
 function RecipeService:Constructor()
 	self.Categories = {}
 	self.Rules = {}
@@ -25,23 +27,29 @@ end
 RecipeService.UsedHelpers = {
 	Add = function(self, ing, what)
 		if not self[ing] then 
-			self[ing] = {what}
-			self[ing][what] = 1 
-		else 
-			table.insert(self[ing], what)
-			self[ing][what] = #(self[ing])
+			self[ing] = {} 
 		end 
+		if not self[ing][what.Name] then 
+			self[ing][what.Name] =  {what, Object = ObjectService:GetObject(what.Name)}
+		else 
+			table.insert(self[ing][what.Name], what)
+		end
 	end, 
 	Delete = function(self, ing, what)
 		if self[ing] then 
 			self[ing].Deleted = true -- notify that something is being deleted
-			local i = self[ing][what]
-			if i then 
-				self[ing][i] = nil 
-				self[ing][what] = nil 
+			if self[ing][what.Name] then 
+				self[ing][what.Name].Deleted = true
+				for i,v in pairs(self[ing][what.Name]) do 
+					if v == what then 
+						table.remove(self[ing][what.Name], i)
+						break 
+					end 
+				end 
 			end 
 		end
-	end
+	end,
+
 
 }
 
@@ -62,24 +70,22 @@ RecipeService.UsedHelpers = {
 function RecipeService:CreateWorkList(InstanceList) 
 	-- assertion is that instancelist 
 	-- consists of roblox instances
-	local out = {}
+	local out = {Used={}}
 	local namelist = {}
 	for i,v in pairs(InstanceList) do 
-		local obj = ObjectService:GetObject(v)
+		local obj = ObjectService:GetObject(v.Name)
 		if not obj then 
-			throw "object not available"
+			throw("object " .. v.Name .. "not available")
 			return nil, 1
 		end 
 		table.insert(out, {v, obj})
 		if not namelist[v.Name] then 
-			namelist[v.Name] = {out[#out][1], [0] = out[#out][2]}
+			namelist[v.Name] = {out[#out][1], Object = out[#out][2]}
 		else 
 			table.insert(namelist[v.Name], out[#out][1])
 		end
 	end 
 	for i,v in pairs(namelist) do 
-		local o = v[0]
-		v[#v + 1] = o 
 		out[i] = v 
 	end 
 	setmetatable(out.Used, {__index = self.UsedHelpers})
@@ -105,8 +111,11 @@ end
 --> Checkout the first rule.
 --> EVERY RULE should test every ingredient
 
+--> Mode:
+--> 1 -> Diagnostic (for helpers)
+--> 2 -> debug (verbose output)
 
-function RecipeService:CheckRecipe(Recipe, Context, List)
+function RecipeService:CheckRecipe(Recipe, Context, List, Mode)
 	-- Check if all rules are present
 	-- The minimal recipe only checks for ingredients.
 	-- First check if the Recipe has any Context rules
@@ -119,15 +128,19 @@ function RecipeService:CheckRecipe(Recipe, Context, List)
 	local List = rl 
 	local skip = {}
 
-	local function EvalRuleProcedure(RuleName, RuleSet, RuleType, List, WholeList, errmsg, errcode)
-		local ok, err = self:EvaluateRule(RuleName, RuleData, RuleSet, RuleType, Context, List, Recipe, WholeList,)
+	local function EvalRuleProcedure(RuleName, RuleData,  RuleSet, RuleType, List, WholeList, errmsg, errcode)
+		local ok, err = self:EvaluateRule(RuleName, RuleData, RuleSet, RuleType, Context, List, Recipe, WholeList, Mode )
+		local err = err or 0
 		if not ok then
+			if Mode and Mode == 2 then 
+				printm("RecipeService", "info", "rule not okay: " .. RuleName)
+			end 
 			if err > 0 then 
 				throw(errmsg)
 			end  
 			return false ,errcode 
 		elseif type(err) == "table" then 
-			for _, skiprule in pairs(ok) do 
+			for _, skiprule in pairs(err) do 
 				skip[skiprule] = true 
 			end 
 		end
@@ -139,7 +152,7 @@ function RecipeService:CheckRecipe(Recipe, Context, List)
 		-- We must evaluate all Context rules
 		for RuleName, RuleData in pairs(Recipe.Context) do
 			if not skip[RuleName] then  
-				local ok, err = EvalRuleProcedure(RuleName, Recipe.Context, {"Context", "NotAResource"}, List, List, "recipe check error clist", 3)
+				local ok, err = EvalRuleProcedure(RuleName, RuleData, Recipe.Context, {"Context", "NotAResource"}, List, List, "recipe check error clist", 3)
 				if not ok then 
 					return false, 9
 				end 
@@ -149,14 +162,18 @@ function RecipeService:CheckRecipe(Recipe, Context, List)
 	if Recipe.Ingredients then 
 		for IngredientName, IngredientRules in pairs(Recipe.Ingredients) do 
 			skip = {} -- clear skip cache 
-			local ok, err = EvalRuleProcedure("Amount", IngredientRules,  {"Ingredient", IngredientName}, List, List, "recipe check error inglist", 2)
+			if Mode == 2 then 
+				printm("RecipeService", "info", "Checking rules for ".. IngredientName)
+			end 
+			local ok, err = EvalRuleProcedure("Amount", IngredientRules.Amount, IngredientRules,  {"Ingredient", IngredientName}, List, List, "recipe check error inglist", 2)
 			if not ok then 
 				return false, 7
 			end 
 			for RuleName, RuleData in pairs(IngredientRules) do 
+				printm("RecipeService", "info", "Evaluating rule " .. RuleName )
 				if RuleName ~= "Amount" then 
 					if not skip[RuleName] then 
-						local ok, err = EvalRuleProcedure(RuleName, IngredientRules, {"Ingredient", IngredientName}, List.Used[IngredientName], List, "recipe check error inglist", 2)
+						local ok, err = EvalRuleProcedure(RuleName, RuleData, IngredientRules, {"Ingredient", IngredientName}, List.Used[IngredientName], List, "recipe check error inglist", 2)
 						if not ok then 
 							return false, 8
 						end 		
@@ -165,18 +182,61 @@ function RecipeService:CheckRecipe(Recipe, Context, List)
 				end 
 			end
 			-- still amount ok?
-			if #List.Used[IngredientName] < IngredientRules.Amount then 
+			local atotal = 0 
+			local chk = nil 
+			local chksame = IngredientRules.Same ~= nil 
+			if IngredientRules.AmountType == "Volume" then 
+				-- check for volume 
+				chk = true 
+			end 
+			local rem 
+			local cando 
+			if chksame then 
+				rem = {}
+				cando = false 
+			end 
+
+
+			for i,v in pairs(List.Used[IngredientName]) do 
+				-- add amount proc
+				if chk then 
+					for ind, val in pairs(v) do 
+						atotal = atotal + ObjectService:GetVolume(v)
+					end 
+				else
+					atotal = atotal + #v
+				end
+				-- chksame rulekit
+				if chksame then 
+					if atotal >= IngredientRules.Amount then 
+						if chksame then 
+							cando = true 
+						end 
+					else
+						rem[i] = true 
+					end 
+					atotal = 0 
+				end 
+
+			end 
+			if chksame then 
+				for i,v in pairs(rem) do 
+					List.Used[IngredientName][i] = nil 
+				end 
+			end 
+			print(atotal)
+			List.Used[IngredientName].AmountNeeded = IngredientRules.Amount
+			if atotal < IngredientRules.Amount then 
 				return false, 6
+			elseif chksame and not cando then 
+				return false, 9 -- NOPE recipe same check fail
 			end 
 		end 
 	else 
 		throw("recipe has no ingredients !?")
 		return false, 1
 	end 	
-	if #List.Used == 0 then 
-		throw "No ingredients usage defined... returning false."
-		return false, 5
-	end 
+
 	return List.Used, 0
 end 
 
@@ -209,12 +269,26 @@ end
 -- this is handy for an option list
 -- be aware that these option may cause a rulename does not exist error
 -- !
-function RecipeService:EvaluateRule(RuleName, RuleData, RuleSet, RuleType, Context, List, Recipe)
+function RecipeService:EvaluateRule(RuleName, RuleData, RuleSet, RuleType, Context, List, Recipe, WholeList, Mode)
 	if not self.Rules[RuleName] then 
 		throw(RuleName .. " a rulename does not exist")
 		return false, 1
 	end 
+	
+	local arglist = {
+	RuleName = RuleName,
+	RuleData = RuleData, 
+	RuleSet = RuleSet, 
+	RuleType = RuleType, 
+	Context = Context, 
+	List = List, 
+	WholeList = WholeList, 
+	Recipe = Recipe, 
+	Mode = Mode 
+}
 
-	return self.Rules[RuleName](RuleData, RuleType, RuleSet, Context, List, Recipe)
+	return self.Rules[RuleName](arglist)
 
-end 
+end
+
+return RecipeService 

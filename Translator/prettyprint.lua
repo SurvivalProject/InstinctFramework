@@ -31,6 +31,18 @@ plib.data = {
 		msgstart = "%{bright red}"
 
 	},
+	warning = {
+		from = {
+			addbe = "%{underline yellow}[",
+			addaf = "%{underline yellow} - "
+		},
+		typemsg = {
+			addbe = "",
+			addaf = "]%{reset}",
+		},
+		msgend = "%{reset}\n",
+		msgstart = "%{bright yellow}"
+	},
 	info = {
 		from = {
 			addbe = "%{bright green}[%{white}",
