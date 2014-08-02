@@ -17,6 +17,22 @@ function CreationService:GetStatusInfo(code)
 	return self.CodeMap[code] or "no info found on this status code"
 end 
 
+function CreationService:DeleteFromUsageListIfExist(NOKLIST, used, IfExist)
+	if NOKLIST[IfExist] then 
+		for UseName, Data in pairs(used) do 
+			print("usename", UseName)
+			for RealName, List in pairs(Data) do 
+				print("rn", Realname)
+				if type(List) == "table" then 
+					for i, ActualItem in ipairs(List) do 
+						print("World has to delete " .. RealName .. " from the world as there is not Metal Container available!!")
+					end
+				end
+			end 
+		end 
+	end
+end 
+
 
 -- figures out if there is only one way to create the item, (1)
 -- or more ways (2)

@@ -26,7 +26,7 @@ local function checkamount(arg)
 			end 	
 		 
 	elseif not arg.RuleSet.Explicit then 
-		for _,idata in ipairs(List) do 
+		for _,idata in ipairs(arg.List) do 
 			local obj = idata[2]
 			if obj:HasConstant("Name", ingwant) then 
 				

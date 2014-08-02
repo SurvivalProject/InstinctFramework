@@ -86,6 +86,10 @@ test.Ingredients = {
 
 }
 
+test.DelFunc = function(which, used)
+	Instinct.Action.CreationService:DeleteFromUsageListIfExist(which, used, "Metal Container")
+end 
+
 test.Created = "Bronze"
 
 print(lfs.currentdir())

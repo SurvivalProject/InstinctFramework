@@ -31,7 +31,7 @@ for i = 1, 9 do
 end 
 
 add "Tin"
-add "Metal Container"
+--add "Metal Container"
 
 	local new = Instinct.Create(rbxi)
 	new.Name = "Tin"
@@ -44,9 +44,15 @@ end
 
 out, err = rs:CheckRecipe(r, World.ctx, inventory, 2 )
 
+print(out, err)
+
+if not err then 
+
 local use, stat = CS:CanCreateImmediate(out, r)
 
 print(CS:GetStatusInfo(stat))
+
+end
 
 print(out, err )
 print(use, stat)

@@ -21,7 +21,14 @@ function RecipeService:Constructor()
 end
 
 function RecipeService:AddCategory(name)
-	self.Categories[name] = true 
+	self.Categories[name] = {}
+end 
+
+function RecipeService:AddRecipeToCategory(recipe, category)
+	if not self.Categories[category] then 
+		self:AddCategory(category)
+	end 
+	table.insert(self.Categories[category], recipe)
 end 
 
 RecipeService.UsedHelpers = {
@@ -129,7 +136,7 @@ function RecipeService:CheckRecipe(Recipe, Context, List, Mode)
 	local skip = {}
 
 	local function EvalRuleProcedure(RuleName, RuleData,  RuleSet, RuleType, List, WholeList, errmsg, errcode)
-		local ok, err = self:EvaluateRule(RuleName, RuleData, RuleSet, RuleType, Context, List, Recipe, WholeList, Mode )
+		local ok, skipd, err = self:EvaluateRule(RuleName, RuleData, RuleSet, RuleType, Context, List, Recipe, WholeList, Mode )
 		local err = err or 0
 		if not ok then
 			if Mode and Mode == 2 then 
@@ -144,7 +151,7 @@ function RecipeService:CheckRecipe(Recipe, Context, List, Mode)
 				skip[skiprule] = true 
 			end 
 		end
-		return ok, err 
+		return ok, skipd, err 
 	end 
 
 	if Recipe.Context then
@@ -159,6 +166,16 @@ function RecipeService:CheckRecipe(Recipe, Context, List, Mode)
 			end 
 		end
 	end
+	local nokrules = {}
+	local gotnok = false 
+	local function nok(ing, rule)
+		gotnok =true
+		if nokrules[ing] then 
+			nokrules[ing][rule] = true 
+		else 
+			nokrules[ing] = {[rule] = true}
+		end 
+	end 
 	if Recipe.Ingredients then 
 		for IngredientName, IngredientRules in pairs(Recipe.Ingredients) do 
 			skip = {} -- clear skip cache 
@@ -166,8 +183,10 @@ function RecipeService:CheckRecipe(Recipe, Context, List, Mode)
 				printm("RecipeService", "info", "Checking rules for ".. IngredientName)
 			end 
 			local ok, err = EvalRuleProcedure("Amount", IngredientRules.Amount, IngredientRules,  {"Ingredient", IngredientName}, List, List, "recipe check error inglist", 2)
-			if not ok then 
+			if not ok and not Recipe.DelFunc then 
 				return false, 7
+			else 
+				table.insert(nokrules, IngredientName)
 			end 
 			for RuleName, RuleData in pairs(IngredientRules) do 
 				printm("RecipeService", "info", "Evaluating rule " .. RuleName )
@@ -175,9 +194,12 @@ function RecipeService:CheckRecipe(Recipe, Context, List, Mode)
 					if not skip[RuleName] then 
 						local ok, err = EvalRuleProcedure(RuleName, RuleData, IngredientRules, {"Ingredient", IngredientName}, List.Used[IngredientName], List, "recipe check error inglist", 2)
 						if not ok then 
+							if Recipe.DelFunc then 
+								nok(IngredientName, RuleName)
+								Recipe.DelFunc(nokrules, List.Used)
+							end
 							return false, 8
-						end 		
-						
+						end
 					end
 				end 
 			end
@@ -196,42 +218,55 @@ function RecipeService:CheckRecipe(Recipe, Context, List, Mode)
 				cando = false 
 			end 
 
-
-			for i,v in pairs(List.Used[IngredientName]) do 
-				-- add amount proc
-				if chk then 
-					for ind, val in pairs(v) do 
-						atotal = atotal + ObjectService:GetVolume(v)
-					end 
-				else
-					atotal = atotal + #v
-				end
-				-- chksame rulekit
-				if chksame then 
-					if atotal >= IngredientRules.Amount then 
-						if chksame then 
-							cando = true 
+			if List.Used[IngredientName] then 
+				for i,v in pairs(List.Used[IngredientName]) do 
+					-- add amount proc
+					if chk then 
+						for ind, val in pairs(v) do 
+							atotal = atotal + ObjectService:GetVolume(v)
 						end 
 					else
-						rem[i] = true 
+						atotal = atotal + #v
+					end
+					-- chksame rulekit
+					if chksame then 
+						if atotal >= IngredientRules.Amount then 
+							if chksame then 
+								cando = true 
+							end 
+						else
+							rem[i] = true 
+						end 
+						atotal = 0 
 					end 
-					atotal = 0 
-				end 
 
-			end 
-			if chksame then 
-				for i,v in pairs(rem) do 
-					List.Used[IngredientName][i] = nil 
 				end 
-			end 
+				if chksame then 
+					for i,v in pairs(rem) do 
+						List.Used[IngredientName][i] = nil 
+					end 
+				end 
+				List.Used[IngredientName].AmountNeeded = IngredientRules.Amount
+			end
 			print(atotal)
-			List.Used[IngredientName].AmountNeeded = IngredientRules.Amount
+		--	List.Used[IngredientName].AmountNeeded = IngredientRules.Amount
 			if atotal < IngredientRules.Amount then 
+				if Recipe.DelFunc then 
+					nok(IngredientName, "AFAmountCheck")
+					Recipe.DelFunc(nokrules, List.Used)
+				end 
 				return false, 6
 			elseif chksame and not cando then 
+				if Recipe.DelFunc then 
+					nok(IngredientName, "AFAmountCheck")
+					Recipe.DelFunc(nokrules, List.Used)
+				end 
 				return false, 9 -- NOPE recipe same check fail
-			end 
-		end 
+			end
+		end
+		if Recipe.DelFunc and gotnok then 
+			Recipe.DelFunc(nokrules, List.Used)
+		end  
 	else 
 		throw("recipe has no ingredients !?")
 		return false, 1
